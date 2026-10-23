@@ -6,10 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -30,10 +34,26 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme {
+                var pantalla by remember { mutableStateOf("inicio") }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoginScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    when (pantalla) {
+                        "inicio" -> PantallaInicio(
+                            modifier = Modifier.padding(innerPadding),
+                            irLogin = { pantalla = "login" },
+                            irRegistro = { pantalla = "registro" }
+                        )
+
+                        "login" -> LoginScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            volver = { pantalla = "inicio" }
+                        )
+
+                        "registro" -> RegistroScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            volver = { pantalla = "inicio" }
+                        )
+                    }
                 }
             }
         }
@@ -41,7 +61,48 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier) {
+fun PantallaInicio(
+    modifier: Modifier = Modifier,
+    irLogin: () -> Unit,
+    irRegistro: () -> Unit
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "InfoDerecho",
+            style = MaterialTheme.typography.headlineLarge
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Bienvenido a nuestra aplicación")
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Button(onClick = irLogin) {
+                Text("Iniciar sesión")
+            }
+
+            OutlinedButton(onClick = irRegistro) {
+                Text("Regístrate")
+            }
+        }
+    }
+}
+
+@Composable
+fun LoginScreen(
+    modifier: Modifier = Modifier,
+    volver: () -> Unit
+) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
 
@@ -53,7 +114,7 @@ fun LoginScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "InfoDerecho",
+            text = "Iniciar sesión",
             style = MaterialTheme.typography.headlineMedium
         )
 
@@ -78,13 +139,82 @@ fun LoginScreen(modifier: Modifier = Modifier) {
         ) {
             Text("Iniciar sesión")
         }
+
+        OutlinedButton(
+            onClick = volver,
+            modifier = Modifier.padding(top = 12.dp)
+        ) {
+            Text("Volver al inicio")
+        }
+    }
+}
+
+@Composable
+fun RegistroScreen(
+    modifier: Modifier = Modifier,
+    volver: () -> Unit
+) {
+    var nombre by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
+    var contrasena by remember { mutableStateOf("") }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Crear cuenta",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        TextField(
+            value = nombre,
+            onValueChange = { nombre = it },
+            label = { Text("Nombre") },
+            modifier = Modifier.padding(top = 20.dp)
+        )
+
+        TextField(
+            value = correo,
+            onValueChange = { correo = it },
+            label = { Text("Correo") },
+            modifier = Modifier.padding(top = 12.dp)
+        )
+
+        TextField(
+            value = contrasena,
+            onValueChange = { contrasena = it },
+            label = { Text("Contraseña") },
+            visualTransformation = PasswordVisualTransformation(),
+            modifier = Modifier.padding(top = 12.dp)
+        )
+
+        Button(
+            onClick = {},
+            modifier = Modifier.padding(top = 20.dp)
+        ) {
+            Text("Registrarse")
+        }
+
+        OutlinedButton(
+            onClick = volver,
+            modifier = Modifier.padding(top = 12.dp)
+        ) {
+            Text("Volver al inicio")
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
+fun PantallaInicioPreview() {
     MaterialTheme {
-        LoginScreen()
+        PantallaInicio(
+            irLogin = {},
+            irRegistro = {}
+        )
     }
 }

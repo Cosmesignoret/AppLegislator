@@ -1,5 +1,7 @@
 
+
 package com.duoc.app
+
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -27,14 +29,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.duoc.app.screens.MaterialScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         setContent {
             MaterialTheme {
                 var pantalla by remember { mutableStateOf("inicio") }
+
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     when (pantalla) {
@@ -42,15 +53,24 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier.padding(innerPadding),
                             irLogin = { pantalla = "login" },
                             irRegistro = { pantalla = "registro" }
+
+
                         )
+
 
                         "login" -> LoginScreen(
                             modifier = Modifier.padding(innerPadding),
                             volver = { pantalla = "inicio" }
                         )
 
+
                         "registro" -> RegistroScreen(
                             modifier = Modifier.padding(innerPadding),
+                            volver = { pantalla = "inicio" }
+
+
+                        )
+                        "material" -> MaterialScreen(
                             volver = { pantalla = "inicio" }
                         )
                     }
@@ -60,29 +80,47 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
 fun PantallaInicio(
     modifier: Modifier = Modifier,
+
+
     irLogin: () -> Unit,
     irRegistro: () -> Unit
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(Color(0.16f, 0.17f, 0.22f))
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
+
+
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.balanza),
+            contentDescription = "Logo InfoDerecho",
+            modifier = Modifier.size(125.dp),
+            contentScale = ContentScale.Fit
+        )
+
+
         Text(
             text = "InfoDerecho",
             style = MaterialTheme.typography.headlineLarge
         )
 
+
         Spacer(modifier = Modifier.height(16.dp))
+
 
         Text("Bienvenido a nuestra aplicación")
 
+
         Spacer(modifier = Modifier.height(24.dp))
+
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -91,12 +129,14 @@ fun PantallaInicio(
                 Text("Iniciar sesión")
             }
 
+
             OutlinedButton(onClick = irRegistro) {
                 Text("Regístrate")
             }
         }
     }
 }
+
 
 @Composable
 fun LoginScreen(
@@ -106,17 +146,35 @@ fun LoginScreen(
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
 
+
     Column(
         modifier = modifier
             .fillMaxSize()
+            .background(Color(0.16f, 0.17f, 0.22f))
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Iniciar sesión",
-            style = MaterialTheme.typography.headlineMedium
+        Image(
+            painter = painterResource(id = R.drawable.balanza),
+            contentDescription = "Logo InfoDerecho",
+            modifier = Modifier.size(120.dp),
+            contentScale = ContentScale.Fit
         )
+
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+
+        Text(
+            text = "InfoDerecho",
+            style = MaterialTheme.typography.headlineMedium,
+
+
+            )
+
+
+
 
         TextField(
             value = correo,
@@ -124,6 +182,7 @@ fun LoginScreen(
             label = { Text("Correo") },
             modifier = Modifier.padding(top = 20.dp)
         )
+
 
         TextField(
             value = contrasena,
@@ -133,12 +192,14 @@ fun LoginScreen(
             modifier = Modifier.padding(top = 12.dp)
         )
 
+
         Button(
             onClick = {},
             modifier = Modifier.padding(top = 20.dp)
         ) {
             Text("Iniciar sesión")
         }
+
 
         OutlinedButton(
             onClick = volver,
@@ -149,6 +210,7 @@ fun LoginScreen(
     }
 }
 
+
 @Composable
 fun RegistroScreen(
     modifier: Modifier = Modifier,
@@ -157,6 +219,7 @@ fun RegistroScreen(
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
+
 
     Column(
         modifier = modifier
@@ -170,6 +233,7 @@ fun RegistroScreen(
             style = MaterialTheme.typography.headlineMedium
         )
 
+
         TextField(
             value = nombre,
             onValueChange = { nombre = it },
@@ -177,12 +241,14 @@ fun RegistroScreen(
             modifier = Modifier.padding(top = 20.dp)
         )
 
+
         TextField(
             value = correo,
             onValueChange = { correo = it },
             label = { Text("Correo") },
             modifier = Modifier.padding(top = 12.dp)
         )
+
 
         TextField(
             value = contrasena,
@@ -192,12 +258,14 @@ fun RegistroScreen(
             modifier = Modifier.padding(top = 12.dp)
         )
 
+
         Button(
             onClick = {},
             modifier = Modifier.padding(top = 20.dp)
         ) {
             Text("Registrarse")
         }
+
 
         OutlinedButton(
             onClick = volver,
@@ -207,6 +275,7 @@ fun RegistroScreen(
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

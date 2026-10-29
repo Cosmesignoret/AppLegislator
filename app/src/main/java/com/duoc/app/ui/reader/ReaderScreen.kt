@@ -25,6 +25,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.duoc.app.viewmodel.ReaderViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

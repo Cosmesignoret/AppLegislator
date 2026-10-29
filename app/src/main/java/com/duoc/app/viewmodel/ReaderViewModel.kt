@@ -1,4 +1,4 @@
-package com.duoc.app.ui.reader
+package com.duoc.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

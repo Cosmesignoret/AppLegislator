@@ -1,9 +1,11 @@
-package com.duoc.app.model
+package com.duoc.app.data.repository
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.duoc.app.data.model.NoteDao
+import com.duoc.app.data.model.NoteEntity
 
 @Database(entities = [NoteEntity::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {

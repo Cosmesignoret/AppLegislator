@@ -1,11 +1,10 @@
-package com.duoc.app
+package com.duoc.app.ui.mainmenu
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment

@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duoc.app.data.model.LegalDocument
+import com.duoc.app.viewmodel.DocumentListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

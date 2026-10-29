@@ -1,7 +1,7 @@
-package com.duoc.app.repository
+package com.duoc.app.data.repository
 
-import com.duoc.app.model.NoteDao
-import com.duoc.app.model.NoteEntity
+import com.duoc.app.data.model.NoteDao
+import com.duoc.app.data.model.NoteEntity
 import kotlinx.coroutines.flow.Flow
 
 class NoteRepository(private val noteDao: NoteDao) {

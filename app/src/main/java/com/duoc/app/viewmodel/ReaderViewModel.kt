@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.duoc.app.data.model.LegalDocument
 import com.duoc.app.data.repository.DocumentRepository
-import com.duoc.app.preferences.UserPreferences
+import com.duoc.app.data.repository.UserPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

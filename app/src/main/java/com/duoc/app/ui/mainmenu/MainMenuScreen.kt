@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.SyncLock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +32,8 @@ fun MainMenuScreen(
     onNavigateToNotes: () -> Unit,
     onNavigateToMaterial: () -> Unit,
     onLogout: () -> Unit,
-    onNavigateToLegalDocuments: () -> Unit
+    onNavigateToLegalDocuments: () -> Unit,
+    onNavigateToHistoryChanges: () -> Unit
 ) {
     var busqueda by remember { mutableStateOf("") }
 
@@ -255,6 +257,15 @@ fun MainMenuScreen(
                     subtitle = "Buscar en el archivo legal",
                     icon = Icons.Default.Description,
                     onClick = onNavigateToLegalDocuments
+                )
+            }
+
+            item {
+                MenuOptionCard (
+                    title = "Cambios Legislativos",
+                    subtitle = "Historial de cambios legislativos",
+                    icon = Icons.Default.SyncLock,
+                    onClick = onNavigateToHistoryChanges
                 )
             }
         }

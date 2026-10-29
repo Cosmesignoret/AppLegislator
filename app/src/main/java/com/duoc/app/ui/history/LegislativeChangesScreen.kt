@@ -33,6 +33,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.duoc.app.data.model.DiffSegment
 import com.duoc.app.data.model.LegislativeChange
 import com.duoc.app.data.model.SegmentType
+import com.duoc.app.viewmodel.LegislativeChangesViewModel
 
 private val AddedBackground = Color(0xFFC8E6C9)
 private val RemovedBackground = Color(0xFFFFCDD2)

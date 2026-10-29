@@ -4,6 +4,8 @@ package com.duoc.app.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,7 +21,7 @@ import com.duoc.app.R
 import com.duoc.app.utils.Validaciones
 
 @Composable
-fun LoginScreen(
+fun LoginValidadoScreen(
     modifier: Modifier = Modifier,
     volver: () -> Unit,
     ingresar: () -> Unit
@@ -29,10 +31,14 @@ fun LoginScreen(
     var errorCorreo by remember { mutableStateOf(false) }
     var errorContrasena by remember { mutableStateOf(false) }
 
+    val fondo = Color(0xFF292B38)
+    val azul = Color(0xFF205C95)
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Color(0xFF292B38))
+            .background(fondo)
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -56,10 +62,11 @@ fun LoginScreen(
 
         Text(
             text = "Iniciar sesión",
+            style = MaterialTheme.typography.titleMedium,
             color = Color.White
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         OutlinedTextField(
             value = correo,
@@ -87,12 +94,12 @@ fun LoginScreen(
 
         if (errorCorreo) {
             Text(
-                text = "Ingresa un correo válido",
-                color = Color(0xFF333A3D)
+                text = "Ingresa un correo electrónico válido",
+                color = Color(0xFFFF8A80)
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = contrasena,
@@ -138,9 +145,15 @@ fun LoginScreen(
                     ingresar()
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = azul
+            )
         ) {
-            Text("Iniciar sesión")
+            Text(
+                text = "Iniciar sesión",
+                color = Color.White
+            )
         }
 
         Spacer(modifier = Modifier.height(12.dp))

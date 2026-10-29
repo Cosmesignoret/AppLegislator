@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,7 +20,8 @@ import androidx.compose.ui.unit.sp
 fun MainMenuScreen(
     onNavigateToNotes: () -> Unit,
     onNavigateToMaterial: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onNavigateToLegalDocuments: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -67,6 +69,13 @@ fun MainMenuScreen(
                 subtitle = "Consulta jurisprudencia y doctrina",
                 icon = Icons.Default.Book,
                 onClick = onNavigateToMaterial
+            )
+
+            MenuOptionCard(
+                title = "Articulos Legales",
+                subtitle = "Buscar en el archivo legal",
+                icon = Icons.Default.Description,
+                onClick = onNavigateToLegalDocuments
             )
         }
     }

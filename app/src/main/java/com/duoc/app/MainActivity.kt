@@ -36,7 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.duoc.app.screens.MaterialScreen
-
+import com.duoc.app.screens.LoginScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,32 +48,30 @@ class MainActivity : ComponentActivity() {
 
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+
                     when (pantalla) {
                         "inicio" -> PantallaInicio(
                             modifier = Modifier.padding(innerPadding),
                             irLogin = { pantalla = "login" },
                             irRegistro = { pantalla = "registro" }
-
-
                         )
-
 
                         "login" -> LoginScreen(
                             modifier = Modifier.padding(innerPadding),
-                            volver = { pantalla = "inicio" }
+                            volver = { pantalla = "inicio" },
+                            ingresar = { pantalla = "material" }
                         )
-
 
                         "registro" -> RegistroScreen(
                             modifier = Modifier.padding(innerPadding),
                             volver = { pantalla = "inicio" }
-
-
                         )
+
                         "material" -> MaterialScreen(
                             volver = { pantalla = "inicio" }
                         )
                     }
+
                 }
             }
         }
@@ -138,78 +136,6 @@ fun PantallaInicio(
 }
 
 
-@Composable
-fun LoginScreen(
-    modifier: Modifier = Modifier,
-    volver: () -> Unit
-) {
-    var correo by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color(0.16f, 0.17f, 0.22f))
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.balanza),
-            contentDescription = "Logo InfoDerecho",
-            modifier = Modifier.size(120.dp),
-            contentScale = ContentScale.Fit
-        )
-
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-
-        Text(
-            text = "InfoDerecho",
-            style = MaterialTheme.typography.headlineMedium,
-
-
-            )
-
-
-
-
-        TextField(
-            value = correo,
-            onValueChange = { correo = it },
-            label = { Text("Correo") },
-            modifier = Modifier.padding(top = 20.dp)
-        )
-
-
-        TextField(
-            value = contrasena,
-            onValueChange = { contrasena = it },
-            label = { Text("Contraseña") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.padding(top = 12.dp)
-        )
-
-
-        Button(
-            onClick = {},
-            modifier = Modifier.padding(top = 20.dp)
-        ) {
-            Text("Iniciar sesión")
-        }
-
-
-        OutlinedButton(
-            onClick = volver,
-            modifier = Modifier.padding(top = 12.dp)
-        ) {
-            Text("Volver al inicio")
-        }
-    }
-}
-
 
 @Composable
 fun RegistroScreen(
@@ -219,7 +145,6 @@ fun RegistroScreen(
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
-
 
     Column(
         modifier = modifier
@@ -233,7 +158,6 @@ fun RegistroScreen(
             style = MaterialTheme.typography.headlineMedium
         )
 
-
         TextField(
             value = nombre,
             onValueChange = { nombre = it },
@@ -241,14 +165,12 @@ fun RegistroScreen(
             modifier = Modifier.padding(top = 20.dp)
         )
 
-
         TextField(
             value = correo,
             onValueChange = { correo = it },
             label = { Text("Correo") },
             modifier = Modifier.padding(top = 12.dp)
         )
-
 
         TextField(
             value = contrasena,
@@ -258,14 +180,12 @@ fun RegistroScreen(
             modifier = Modifier.padding(top = 12.dp)
         )
 
-
         Button(
             onClick = {},
             modifier = Modifier.padding(top = 20.dp)
         ) {
             Text("Registrarse")
         }
-
 
         OutlinedButton(
             onClick = volver,
@@ -275,7 +195,6 @@ fun RegistroScreen(
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

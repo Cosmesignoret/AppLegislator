@@ -3,8 +3,9 @@
   <component name="CidrRootsConfiguration">
     <excludeRoots>
       <file path="$PROJECT_DIR$/app/src/main/java/com/duoc/app" />
+      <file path="$PROJECT_DIR$/app/src/main/java/com/duoc/app/ui/theme" />
     </excludeRoots>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" project-jdk-name="temurin-21" project-jdk-type="JavaSDK" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_21" project-jdk-name="jbr-21" project-jdk-type="JavaSDK" />
 </project>

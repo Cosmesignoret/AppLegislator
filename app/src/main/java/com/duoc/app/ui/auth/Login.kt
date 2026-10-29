@@ -1,3 +1,4 @@
+
 package com.duoc.app.ui.auth
 
 import androidx.compose.foundation.Image
@@ -6,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,9 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.duoc.app.R
 import com.duoc.app.utils.Validaciones
 
@@ -30,8 +34,10 @@ fun LoginValidadoScreen(
     var errorCorreo by remember { mutableStateOf(false) }
     var errorContrasena by remember { mutableStateOf(false) }
 
-    val fondo = Color(0xFF292B38)
+    val fondo = Color(0xFFEDF5FA)
     val azul = Color(0xFF205C95)
+    val azulOscuro = Color(0xFF174666)
+    val rojoError = Color(0xFFB3261E)
 
     Column(
         modifier = modifier
@@ -43,7 +49,7 @@ fun LoginValidadoScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = R.drawable.balanza),
+            painter = painterResource(id = R.drawable.balanza2),
             contentDescription = "Logo InfoDerecho",
             modifier = Modifier.size(120.dp),
             contentScale = ContentScale.Fit
@@ -53,8 +59,9 @@ fun LoginValidadoScreen(
 
         Text(
             text = "InfoDerecho",
-            style = MaterialTheme.typography.headlineMedium,
-            color = Color.White
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold,
+            color = azulOscuro
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -62,7 +69,7 @@ fun LoginValidadoScreen(
         Text(
             text = "Iniciar sesión",
             style = MaterialTheme.typography.titleMedium,
-            color = Color.White
+            color = azulOscuro
         )
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -79,14 +86,17 @@ fun LoginValidadoScreen(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
             ),
+            shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.LightGray,
-                focusedBorderColor = Color.White,
+                focusedTextColor = azulOscuro,
+                unfocusedTextColor = azulOscuro,
+                focusedLabelColor = azul,
+                unfocusedLabelColor = Color.Gray,
+                focusedBorderColor = azul,
                 unfocusedBorderColor = Color.LightGray,
-                cursorColor = Color.White
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = azul
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -94,7 +104,7 @@ fun LoginValidadoScreen(
         if (errorCorreo) {
             Text(
                 text = "Ingresa un correo electrónico válido",
-                color = Color(0xFFFF8A80)
+                color = rojoError
             )
         }
 
@@ -113,14 +123,17 @@ fun LoginValidadoScreen(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
             ),
+            shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.LightGray,
-                focusedBorderColor = Color.White,
+                focusedTextColor = azulOscuro,
+                unfocusedTextColor = azulOscuro,
+                focusedLabelColor = azul,
+                unfocusedLabelColor = Color.Gray,
+                focusedBorderColor = azul,
                 unfocusedBorderColor = Color.LightGray,
-                cursorColor = Color.White
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                cursorColor = azul
             ),
             modifier = Modifier.fillMaxWidth()
         )
@@ -128,7 +141,7 @@ fun LoginValidadoScreen(
         if (errorContrasena) {
             Text(
                 text = "La contraseña debe tener mínimo 6 caracteres",
-                color = Color(0xFFFF8A80)
+                color = rojoError
             )
         }
 
@@ -144,14 +157,18 @@ fun LoginValidadoScreen(
                     ingresar()
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = azul
             )
         ) {
             Text(
                 text = "Iniciar sesión",
-                color = Color.White
+                color = Color.White,
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -159,11 +176,18 @@ fun LoginValidadoScreen(
 
         OutlinedButton(
             onClick = volver,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = Color.White
+            )
         ) {
             Text(
                 text = "Volver al inicio",
-                color = Color.White
+                color = azul,
+                fontWeight = FontWeight.Bold
             )
         }
     }

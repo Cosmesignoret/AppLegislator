@@ -11,7 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.duoc.app.ui.material.TarjetaMaterial
 
 @Composable
 fun MaterialScreen(volver: () -> Unit) {
@@ -91,8 +90,7 @@ fun MaterialScreen(volver: () -> Unit) {
                     "Ejemplo de jurisprudencia sobre interpretación de normas y consentimiento.",
                     onClick = {
                         tituloSeleccionado = "Corte Suprema - Rol 123-2022"
-                        descripcionSeleccionada =
-                            "Ejemplo de jurisprudencia sobre interpretación de normas y consentimiento."
+                        descripcionSeleccionada = "Ejemplo de jurisprudencia sobre interpretación de normas y consentimiento."
                         mostrarDetalle = true
                     }
                 )

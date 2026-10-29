@@ -14,14 +14,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.duoc.app.ui.auth.PantallaInicio
-import com.duoc.app.ui.auth.RegistroScreen
-import com.duoc.app.ui.material.MaterialScreen
+import com.duoc.app.screens.PantallaInicio
+import com.duoc.app.screens.LoginScreen
+import com.duoc.app.screens.RegistroScreen
+import com.duoc.app.screens.MaterialScreen
 import com.duoc.app.viewmodel.NoteViewModel
 import com.duoc.app.screens.LoginValidadoScreen
-import com.duoc.app.ui.mainmenu.MainMenuScreen
-import com.duoc.app.ui.personalnotes.PersonalNotesScreen
-
 class MainActivity : ComponentActivity() {
 
     private val noteViewModel: NoteViewModel by viewModels()

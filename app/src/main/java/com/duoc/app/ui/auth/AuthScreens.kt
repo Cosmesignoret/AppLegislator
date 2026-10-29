@@ -1,4 +1,4 @@
-package com.duoc.app.ui.auth
+package com.duoc.app.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

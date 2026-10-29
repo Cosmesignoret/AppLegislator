@@ -1,4 +1,4 @@
-package com.duoc.app.ui.personalnotes
+package com.duoc.app.ui.notes
 
 import android.graphics.BitmapFactory
 import android.util.Base64
@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.duoc.app.AddNoteDialog
 import com.duoc.app.data.model.NoteEntity
 import com.duoc.app.viewmodel.NoteViewModel
 import kotlinx.coroutines.delay

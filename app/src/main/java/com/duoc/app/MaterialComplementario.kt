@@ -16,12 +16,34 @@ import androidx.compose.ui.unit.dp
 fun MaterialScreen(volver: () -> Unit) {
     var pestana by remember { mutableStateOf(0) }
     val azul = Color(0xFF205C95)
+    var tituloSeleccionado by remember { mutableStateOf("") }
+    var descripcionSeleccionada by remember { mutableStateOf("") }
+    var mostrarDetalle by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF1F5F9))
+
     ) {
+        if (mostrarDetalle) {
+            AlertDialog(
+                onDismissRequest = { mostrarDetalle = false },
+                title = {
+                    Text(tituloSeleccionado)
+                },
+                text = {
+                    Text(descripcionSeleccionada)
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = { mostrarDetalle = false }
+                    ) {
+                        Text("Cerrar")
+                    }
+                }
+            )
+        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -65,28 +87,12 @@ fun MaterialScreen(volver: () -> Unit) {
             if (pestana == 0) {
                 TarjetaMaterial(
                     "Corte Suprema - Rol 123-2022",
-                    "Ejemplo de jurisprudencia sobre interpretación de normas y consentimiento."
-                )
-                TarjetaMaterial(
-                    "Corte Suprema - Rol 456-2022",
-                    "Ejemplo de resolución judicial relacionada con obligaciones contractuales."
-                )
-                TarjetaMaterial(
-                    "Corte Suprema - Rol 789-2023",
-                    "Ejemplo de sentencia sobre responsabilidad civil."
-                )
-            } else {
-                TarjetaMaterial(
-                    "Teoría del consentimiento",
-                    "Explicación del consentimiento y su importancia en los actos jurídicos."
-                )
-                TarjetaMaterial(
-                    "Obligaciones y contratos",
-                    "Conceptos básicos sobre las obligaciones y los contratos."
-                )
-                TarjetaMaterial(
-                    "Responsabilidad civil",
-                    "Introducción a los principios de responsabilidad civil."
+                    "Ejemplo de jurisprudencia sobre interpretación de normas y consentimiento.",
+                    onClick = {
+                        tituloSeleccionado = "Corte Suprema - Rol 123-2022"
+                        descripcionSeleccionada = "Ejemplo de jurisprudencia sobre interpretación de normas y consentimiento."
+                        mostrarDetalle = true
+                    }
                 )
             }
         }
@@ -95,7 +101,11 @@ fun MaterialScreen(volver: () -> Unit) {
 
 
 @Composable
-fun TarjetaMaterial(titulo: String, descripcion: String) {
+fun TarjetaMaterial(
+    titulo: String,
+    descripcion: String,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),

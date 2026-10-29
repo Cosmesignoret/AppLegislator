@@ -17,13 +17,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.duoc.app.data.repository.MockDocumentRepository
 import com.duoc.app.preferences.UserPreferences
-import com.duoc.app.screens.LoginValidadoScreen
-import com.duoc.app.screens.MaterialScreen
+import com.duoc.app.ui.auth.LoginValidadoScreen
 import com.duoc.app.ui.auth.PantallaInicio
 import com.duoc.app.ui.auth.RegistroScreen
 import com.duoc.app.ui.list.DocumentListScreen
 import com.duoc.app.ui.mainmenu.MainMenuScreen
-import com.duoc.app.ui.personalnotes.PersonalNotesScreen
+import com.duoc.app.ui.material.MaterialScreen
+import com.duoc.app.ui.notes.PersonalNotesScreen
 import com.duoc.app.viewmodel.DocumentListViewModel
 import com.duoc.app.ui.reader.ReaderScreen
 import com.duoc.app.viewmodel.NoteViewModel

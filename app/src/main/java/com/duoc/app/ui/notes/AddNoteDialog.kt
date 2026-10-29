@@ -1,4 +1,4 @@
-package com.duoc.app
+package com.duoc.app.ui.notes
 
 import android.graphics.Bitmap
 import android.util.Base64

@@ -21,7 +21,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duoc.app.R
-import com.duoc.app.SeguridadContrasena
+import com.duoc.app.utils.SeguridadContrasena
 import com.duoc.app.model.AppDatabase
 import com.duoc.app.model.UsuarioEntity
 import kotlinx.coroutines.Dispatchers

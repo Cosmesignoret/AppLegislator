@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,8 +15,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
-import com.duoc.app.SeguridadContrasena
-import com.duoc.app.SesionManager
+import com.duoc.app.utils.SeguridadContrasena
+import com.duoc.app.repository.SesionManager
 import com.duoc.app.model.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

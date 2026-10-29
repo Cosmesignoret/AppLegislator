@@ -1,5 +1,5 @@
 
-package com.duoc.app.model
+package com.duoc.app.data.model
 
 import androidx.room.Entity
 import androidx.room.Index

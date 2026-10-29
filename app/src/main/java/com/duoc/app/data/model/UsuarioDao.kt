@@ -1,9 +1,10 @@
 
-package com.duoc.app.model
+package com.duoc.app.data.model
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.duoc.app.data.model.UsuarioEntity
 
 @Dao
 interface UsuarioDao {

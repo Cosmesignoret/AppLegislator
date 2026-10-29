@@ -33,6 +33,7 @@ import com.duoc.app.viewmodel.DocumentListViewModel
 @Composable
 fun DocumentListScreen(
     onDocumentClick: (String) -> Unit,
+    onBack: () -> Unit,
     viewModel: DocumentListViewModel
 ) {
     val query by viewModel.query.collectAsStateWithLifecycle()
@@ -43,7 +44,7 @@ fun DocumentListScreen(
             TopAppBar(
                 title = { Text("AppLegislator") },
                 navigationIcon = {
-                    IconButton(onClick = { /* Sin funcionalidades de momento, se requiere la vista principal (post-login) */ }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"

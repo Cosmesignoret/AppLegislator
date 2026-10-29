@@ -1,4 +1,4 @@
-package com.duoc.app.screens
+package com.duoc.app.ui.material
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

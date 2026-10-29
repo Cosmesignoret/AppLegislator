@@ -3,9 +3,9 @@ package com.duoc.app.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.duoc.app.model.AppDatabase
-import com.duoc.app.model.NoteEntity
-import com.duoc.app.repository.NoteRepository
+import com.duoc.app.data.repository.AppDatabase
+import com.duoc.app.data.model.NoteEntity
+import com.duoc.app.data.repository.NoteRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn

@@ -1,4 +1,4 @@
-package com.duoc.app
+package com.duoc.app.ui.personalnotes
 
 import android.graphics.BitmapFactory
 import android.util.Base64
@@ -21,8 +21,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.duoc.app.model.NoteEntity
+import com.duoc.app.AddNoteDialog
+import com.duoc.app.data.model.NoteEntity
 import com.duoc.app.viewmodel.NoteViewModel
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +64,7 @@ fun PersonalNotesScreen(
     ) { innerPadding ->
         LaunchedEffect(fabPressed) {
             if (fabPressed) {
-                kotlinx.coroutines.delay(150)
+                delay(150)
                 fabPressed = false
             }
         }

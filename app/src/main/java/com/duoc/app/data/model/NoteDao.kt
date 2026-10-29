@@ -1,4 +1,4 @@
-package com.duoc.app.model
+package com.duoc.app.data.model
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow

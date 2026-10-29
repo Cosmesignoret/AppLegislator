@@ -14,9 +14,9 @@ import androidx.navigation.navArgument
 import com.duoc.app.data.repository.MockDocumentRepository
 import com.duoc.app.preferences.UserPreferences
 import com.duoc.app.ui.list.DocumentListScreen
-import com.duoc.app.ui.list.DocumentListViewModel
+import com.duoc.app.viewmodel.DocumentListViewModel
 import com.duoc.app.ui.reader.ReaderScreen
-import com.duoc.app.ui.reader.ReaderViewModel
+import com.duoc.app.viewmodel.ReaderViewModel
 
 @Composable
 fun AppNavigation() {

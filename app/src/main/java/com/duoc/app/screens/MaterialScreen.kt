@@ -1,11 +1,10 @@
-
 package com.duoc.app.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -24,26 +23,20 @@ fun MaterialScreen(volver: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF1F5F9))
-
     ) {
         if (mostrarDetalle) {
             AlertDialog(
                 onDismissRequest = { mostrarDetalle = false },
-                title = {
-                    Text(tituloSeleccionado)
-                },
-                text = {
-                    Text(descripcionSeleccionada)
-                },
+                title = { Text(tituloSeleccionado) },
+                text = { Text(descripcionSeleccionada) },
                 confirmButton = {
-                    TextButton(
-                        onClick = { mostrarDetalle = false }
-                    ) {
+                    TextButton(onClick = { mostrarDetalle = false }) {
                         Text("Cerrar")
                     }
                 }
             )
         }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -51,13 +44,14 @@ fun MaterialScreen(volver: () -> Unit) {
                 .padding(16.dp)
         ) {
             TextButton(onClick = volver) {
-                Text("‹", color = Color.White)
+                Text("‹ Volver", color = Color.White)
             }
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Material Complementario",
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 12.dp)
+                modifier = Modifier.padding(top = 10.dp)
             )
         }
 
@@ -94,11 +88,20 @@ fun MaterialScreen(volver: () -> Unit) {
                         mostrarDetalle = true
                     }
                 )
+            } else {
+                TarjetaMaterial(
+                    "Tratado de Derecho Civil - Alessandri",
+                    "Análisis doctrinal sobre los elementos de la obligación.",
+                    onClick = {
+                        tituloSeleccionado = "Tratado de Derecho Civil"
+                        descripcionSeleccionada = "Análisis doctrinal sobre los elementos de la obligación."
+                        mostrarDetalle = true
+                    }
+                )
             }
         }
     }
 }
-
 
 @Composable
 fun TarjetaMaterial(
@@ -107,6 +110,7 @@ fun TarjetaMaterial(
     onClick: () -> Unit
 ) {
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),

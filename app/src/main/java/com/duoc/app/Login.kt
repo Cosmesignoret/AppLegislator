@@ -1,24 +1,27 @@
 
 package com.duoc.app.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.duoc.app.R
-import com.duoc.app.utils.Validaciones
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import com.duoc.app.SeguridadContrasena
+import com.duoc.app.SesionManager
+import com.duoc.app.model.AppDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun LoginValidadoScreen(
@@ -26,13 +29,18 @@ fun LoginValidadoScreen(
     volver: () -> Unit,
     ingresar: () -> Unit
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val database = remember { AppDatabase.getDatabase(context) }
+    val sesionManager = remember { SesionManager(context) }
+
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
-    var errorCorreo by remember { mutableStateOf(false) }
-    var errorContrasena by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf("") }
+    var cargando by remember { mutableStateOf(false) }
 
-    val fondo = Color(0xFF292B38)
     val azul = Color(0xFF205C95)
+    val fondo = Color(0xFFEDF5FA)
 
     Column(
         modifier = modifier
@@ -40,64 +48,36 @@ fun LoginValidadoScreen(
             .background(fondo)
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.balanza),
-            contentDescription = "Logo InfoDerecho",
-            modifier = Modifier.size(120.dp),
-            contentScale = ContentScale.Fit
+        Text(
+            text = "InfoDerecho",
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF174666)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = "InfoDerecho",
-            style = MaterialTheme.typography.headlineMedium,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
             text = "Iniciar sesión",
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.White
+            fontSize = 22.sp,
+            color = azul
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(30.dp))
 
         OutlinedTextField(
             value = correo,
             onValueChange = {
                 correo = it
-                errorCorreo = false
+                error = ""
             },
             label = { Text("Correo electrónico") },
-            singleLine = true,
-            isError = errorCorreo,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            ),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.LightGray,
-                focusedBorderColor = Color.White,
-                unfocusedBorderColor = Color.LightGray,
-                cursorColor = Color.White
-            ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
-
-        if (errorCorreo) {
-            Text(
-                text = "Ingresa un correo electrónico válido",
-                color = Color(0xFFFF8A80)
-            )
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -105,31 +85,20 @@ fun LoginValidadoScreen(
             value = contrasena,
             onValueChange = {
                 contrasena = it
-                errorContrasena = false
+                error = ""
             },
             label = { Text("Contraseña") },
-            singleLine = true,
-            isError = errorContrasena,
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password
-            ),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedLabelColor = Color.White,
-                unfocusedLabelColor = Color.LightGray,
-                focusedBorderColor = Color.White,
-                unfocusedBorderColor = Color.LightGray,
-                cursorColor = Color.White
-            ),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
         )
 
-        if (errorContrasena) {
+        if (error.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(12.dp))
+
             Text(
-                text = "La contraseña debe tener mínimo 6 caracteres",
-                color = Color(0xFFFF8A80)
+                text = error,
+                color = Color(0xFFD32F2F)
             )
         }
 
@@ -137,34 +106,62 @@ fun LoginValidadoScreen(
 
         Button(
             onClick = {
-                errorCorreo = !Validaciones.correoValido(correo)
-                errorContrasena =
-                    !Validaciones.contrasenaValida(contrasena)
+                if (correo.isBlank() || contrasena.isBlank()) {
+                    error = "Completa todos los campos"
+                } else {
+                    cargando = true
 
-                if (!errorCorreo && !errorContrasena) {
-                    ingresar()
+                    scope.launch {
+                        try {
+                            val usuario = withContext(Dispatchers.IO) {
+                                database.usuarioDao().buscarPorCorreo(
+                                    correo.trim().lowercase()
+                                )
+                            }
+
+                            val esValido = if (usuario != null) {
+                                withContext(Dispatchers.Default) {
+                                    SeguridadContrasena.verificar(
+                                        contrasena,
+                                        usuario.salt,
+                                        usuario.contrasenaHash
+                                    )
+                                }
+                            } else {
+                                false
+                            }
+
+                            if (usuario != null && esValido) {
+                                sesionManager.guardarSesion(usuario.id)
+                                ingresar()
+                            } else {
+                                error = "Correo o contraseña incorrectos"
+                            }
+                        } catch (e: Exception) {
+                            error = "No se pudo iniciar sesión"
+                        } finally {
+                            cargando = false
+                        }
+                    }
                 }
             },
+            enabled = !cargando,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = azul
             )
         ) {
             Text(
-                text = "Iniciar sesión",
-                color = Color.White
+                text = if (cargando) "Ingresando..." else "Iniciar sesión"
             )
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        OutlinedButton(
-            onClick = volver,
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        TextButton(onClick = volver) {
             Text(
-                text = "Volver al inicio",
-                color = Color.White
+                text = "Volver",
+                color = azul
             )
         }
     }

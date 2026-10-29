@@ -15,11 +15,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.duoc.app.screens.PantallaInicio
-import com.duoc.app.screens.LoginScreen
 import com.duoc.app.screens.RegistroScreen
-import com.duoc.app.screens.MaterialScreen
-import com.duoc.app.viewmodel.NoteViewModel
 import com.duoc.app.screens.LoginValidadoScreen
+import com.duoc.app.screens.MaterialComplementarioScreen
+import com.duoc.app.viewmodel.NoteViewModel
+
 class MainActivity : ComponentActivity() {
 
     private val noteViewModel: NoteViewModel by viewModels()
@@ -27,9 +27,20 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val sesionManager = SesionManager(applicationContext)
+
         setContent {
             MaterialTheme {
-                var pantalla by remember { mutableStateOf("inicio") }
+
+                var pantalla by remember {
+                    mutableStateOf(
+                        if (sesionManager.sesionIniciada()) {
+                            "menu"
+                        } else {
+                            "inicio"
+                        }
+                    )
+                }
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize()
@@ -39,35 +50,58 @@ class MainActivity : ComponentActivity() {
 
                         "inicio" -> PantallaInicio(
                             modifier = Modifier.padding(innerPadding),
-                            irLogin = { pantalla = "login" },
-                            irRegistro = { pantalla = "registro" }
+                            irLogin = {
+                                pantalla = "login"
+                            },
+                            irRegistro = {
+                                pantalla = "registro"
+                            }
                         )
 
                         "login" -> LoginValidadoScreen(
                             modifier = Modifier.padding(innerPadding),
-                            volver = { pantalla = "inicio" },
-                            ingresar = { pantalla = "menu" }
+                            volver = {
+                                pantalla = "inicio"
+                            },
+                            ingresar = {
+                                pantalla = "menu"
+                            }
                         )
 
                         "registro" -> RegistroScreen(
                             modifier = Modifier.padding(innerPadding),
-                            onRegisterSuccess = { pantalla = "login" },
-                            volver = { pantalla = "inicio" }
+                            onRegisterSuccess = {
+                                pantalla = "login"
+                            },
+                            volver = {
+                                pantalla = "inicio"
+                            }
                         )
 
                         "menu" -> MainMenuScreen(
-                            onNavigateToNotes = { pantalla = "notas" },
-                            onNavigateToMaterial = { pantalla = "material" },
-                            onLogout = { pantalla = "inicio" }
+                            onNavigateToNotes = {
+                                pantalla = "notas"
+                            },
+                            onNavigateToMaterial = {
+                                pantalla = "material"
+                            },
+                            onLogout = {
+                                sesionManager.cerrarSesion()
+                                pantalla = "inicio"
+                            }
                         )
 
                         "notas" -> PersonalNotesScreen(
                             viewModel = noteViewModel,
-                            onBack = { pantalla = "menu" }
+                            onBack = {
+                                pantalla = "menu"
+                            }
                         )
 
-                        "material" -> MaterialScreen(
-                            volver = { pantalla = "menu" }
+                        "material" -> MaterialComplementarioScreen(
+                            volver = {
+                                pantalla = "menu"
+                            }
                         )
                     }
                 }

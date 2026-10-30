@@ -16,7 +16,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.duoc.app.data.repository.MockDocumentRepository
-import com.duoc.app.preferences.UserPreferences
 import com.duoc.app.ui.auth.LoginValidadoScreen
 import com.duoc.app.ui.auth.PantallaInicio
 import com.duoc.app.ui.auth.RegistroScreen
@@ -28,7 +27,7 @@ import com.duoc.app.viewmodel.DocumentListViewModel
 import com.duoc.app.ui.reader.ReaderScreen
 import com.duoc.app.viewmodel.NoteViewModel
 import com.duoc.app.viewmodel.ReaderViewModel
-
+import com.duoc.app.data.repository.UserPreferences
 @Composable
 fun AppNavigation(noteViewModel: NoteViewModel) {
     val navController = rememberNavController()

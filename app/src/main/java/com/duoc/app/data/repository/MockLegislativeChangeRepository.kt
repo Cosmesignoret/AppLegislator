@@ -17,10 +17,7 @@ class MockLegislativeChangeRepository : LegislativeChangeRepository {
             currentSegments = listOf(
                 DiffSegment(SegmentType.UNCHANGED, "Once upon a time there was a young "),
                 DiffSegment(SegmentType.ADDED, "Platypus"),
-                DiffSegment(
-                    SegmentType.UNCHANGED,
-                    " named Zapi who lived at the edge of a farm. Since he was little he had felt an "
-                ),
+                DiffSegment(SegmentType.UNCHANGED, " named Zapi who lived at the edge of a farm. Since he was little he had felt an "),
                 DiffSegment(SegmentType.ADDED, "enormous fascination"),
                 DiffSegment(SegmentType.UNCHANGED, " for the "),
                 DiffSegment(SegmentType.ADDED, "sheep"),
@@ -31,10 +28,7 @@ class MockLegislativeChangeRepository : LegislativeChangeRepository {
             previousSegments = listOf(
                 DiffSegment(SegmentType.UNCHANGED, "Once upon a time there was a young "),
                 DiffSegment(SegmentType.REMOVED, "Rabbit"),
-                DiffSegment(
-                    SegmentType.UNCHANGED,
-                    " named Zapi who lived at the edge of a farm. Since he was little he had felt a "
-                ),
+                DiffSegment(SegmentType.UNCHANGED, " named Zapi who lived at the edge of a farm. Since he was little he had felt a "),
                 DiffSegment(SegmentType.REMOVED, "great admiration"),
                 DiffSegment(SegmentType.UNCHANGED, " for the "),
                 DiffSegment(SegmentType.REMOVED, "hens"),

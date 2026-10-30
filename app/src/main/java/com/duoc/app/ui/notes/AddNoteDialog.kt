@@ -1,7 +1,9 @@
 package com.duoc.app.ui.notes
 
+import android.Manifest
 import android.graphics.Bitmap
 import android.util.Base64
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -10,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -20,6 +23,8 @@ fun AddNoteDialog(
     onDismiss: () -> Unit,
     onSaveNote: (title: String, content: String, reference: String, date: String, imageBase64: String?) -> Unit
 ) {
+    val context = LocalContext.current
+
     var title by remember { mutableStateOf("") }
     var content by remember { mutableStateOf("") }
     var reference by remember { mutableStateOf("") }
@@ -30,13 +35,26 @@ fun AddNoteDialog(
     var capturedBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var imageBase64String by remember { mutableStateOf<String?>(null) }
 
-    // Recurso Nativo: Captura de Foto con Cámara
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap ->
         if (bitmap != null) {
             capturedBitmap = bitmap
             imageBase64String = encodeBitmapToBase64(bitmap)
+        }
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            cameraLauncher.launch(null)
+        } else {
+            Toast.makeText(
+                context,
+                "Permiso de cámara denegado. No se puede adjuntar la foto.",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -81,7 +99,9 @@ fun AddNoteDialog(
                 )
 
                 OutlinedButton(
-                    onClick = { cameraLauncher.launch(null) },
+                    onClick = {
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("📷 Adjuntar Foto con Cámara")
@@ -102,13 +122,31 @@ fun AddNoteDialog(
             Button(
                 onClick = {
                     var valid = true
-                    if (title.isBlank()) { titleError = true; valid = false }
-                    if (content.isBlank()) { contentError = true; valid = false }
+                    if (title.isBlank()) {
+                        titleError = true
+                        valid = false
+                    }
+                    if (content.isBlank()) {
+                        contentError = true
+                        valid = false
+                    }
 
                     if (valid) {
-                        val currentDate = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+                        val currentDate = SimpleDateFormat(
+                            "dd/MM/yyyy HH:mm",
+                            Locale.getDefault()
+                        ).format(Date())
+
                         val refText = if (reference.isBlank()) "General" else reference
-                        onSaveNote(title.trim(), content.trim(), refText, currentDate, imageBase64String)
+
+                        onSaveNote(
+                            title.trim(),
+                            content.trim(),
+                            refText,
+                            currentDate,
+                            imageBase64String
+                        )
+
                         onDismiss()
                     }
                 }

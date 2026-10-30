@@ -16,9 +16,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.duoc.app.data.repository.MockDocumentRepository
+import com.duoc.app.data.repository.MockLegislativeChangeRepository
+import com.duoc.app.data.repository.UserPreferences
 import com.duoc.app.ui.auth.LoginValidadoScreen
 import com.duoc.app.ui.auth.PantallaInicio
 import com.duoc.app.ui.auth.RegistroScreen
+import com.duoc.app.ui.history.LegislativeChangesScreen
+import com.duoc.app.viewmodel.LegislativeChangesViewModel
 import com.duoc.app.ui.list.DocumentListScreen
 import com.duoc.app.ui.mainmenu.MainMenuScreen
 import com.duoc.app.ui.material.MaterialScreen
@@ -27,13 +31,14 @@ import com.duoc.app.viewmodel.DocumentListViewModel
 import com.duoc.app.ui.reader.ReaderScreen
 import com.duoc.app.viewmodel.NoteViewModel
 import com.duoc.app.viewmodel.ReaderViewModel
-import com.duoc.app.data.repository.UserPreferences
+
 @Composable
 fun AppNavigation(noteViewModel: NoteViewModel) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val repository = remember { MockDocumentRepository() }
     val preferences = remember { UserPreferences(context) }
+    val changesRepository = remember { MockLegislativeChangeRepository() }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         NavHost(
@@ -77,6 +82,7 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                     onNavigateToNotes = { navController.navigate(Routes.NOTES) },
                     onNavigateToMaterial = { navController.navigate(Routes.MATERIAL) },
                     onNavigateToLegalDocuments = { navController.navigate(Routes.ARTICLES) },
+                    onNavigateToHistoryChanges = { navController.navigate(Routes.LEGISLATIVE_CHANGES) },
                     onLogout = {
                         navController.navigate(Routes.HOME) {
                             popUpTo(0) { inclusive = true }
@@ -125,6 +131,19 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                     viewModel = vm
                 )
             }
+
+            composable(Routes.LEGISLATIVE_CHANGES) {
+                val vm: LegislativeChangesViewModel = viewModel(
+                    factory = viewModelFactory {
+                        initializer { LegislativeChangesViewModel(changesRepository) }
+                    }
+                )
+                LegislativeChangesScreen(
+                    onBack = { navController.popBackStack() },
+                    viewModel = vm
+                )
+            }
+
         }
     }
 }
@@ -138,6 +157,7 @@ private object Routes {
     const val MATERIAL = "material"
     const val ARTICLES = "articles"
     const val READER = "reader/{id}"
+    const val LEGISLATIVE_CHANGES = "legislative_changes"
 
     fun reader(id: String): String = "reader/$id"
 }

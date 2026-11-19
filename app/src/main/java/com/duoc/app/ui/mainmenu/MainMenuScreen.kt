@@ -1,4 +1,3 @@
-
 package com.duoc.app.ui.mainmenu
 
 import android.graphics.BitmapFactory
@@ -45,10 +44,6 @@ import com.duoc.app.data.repository.AvatarManager
 import com.duoc.app.data.repository.UsuarioLocalRepository
 import kotlinx.coroutines.launch
 
-private val AzulPrincipal = Color(0xFF205C95)
-private val AzulOscuro = Color(0xFF174666)
-private val FondoCeleste = Color(0xFFEDF5FA)
-private val AzulTarjetas = Color(0xFFDCEAF5)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,8 +54,17 @@ fun MainMenuScreen(
     onNavigateToLegalDocuments: () -> Unit,
     onNavigateToHistoryChanges: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onNavigateToNotifications: () -> Unit = {}
 ) {
+    val esquema = MaterialTheme.colorScheme
+    val AzulPrincipal = if (esquema.background == Color(0xFF121212)) Color(0xFF303030) else Color(0xFF205C95)
+    val AzulOscuro = esquema.onBackground
+    val FondoCeleste = esquema.background
+    val AzulTarjetas = esquema.surfaceVariant
+    val colorTarjeta = esquema.surface
+    val colorSecundario = esquema.onSurfaceVariant
+
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val avatarManager = remember(context) { AvatarManager(context) }
@@ -127,7 +131,7 @@ fun MainMenuScreen(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                drawerContainerColor = Color.White,
+                drawerContainerColor = colorTarjeta,
                 modifier = Modifier.width(300.dp)
             ) {
                 Column(
@@ -251,20 +255,19 @@ fun MainMenuScreen(
 
                     NavigationDrawerItem(
                         label = {
-                            Text(
-                                "Configuración (próximamente)",
-                                color = Color.Gray
-                            )
+                            Text("Configuración")
                         },
                         selected = false,
                         icon = {
                             Icon(
                                 imageVector = Icons.Default.Settings,
-                                contentDescription = null,
-                                tint = Color.Gray
+                                contentDescription = null
                             )
                         },
-                        onClick = {}
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigateToSettings()
+                        }
                     )
 
 
@@ -350,7 +353,7 @@ fun MainMenuScreen(
             },
             bottomBar = {
                 NavigationBar(
-                    containerColor = Color.White
+                    containerColor = colorTarjeta
                 ) {
                     NavigationBarItem(
                         selected = !mostrarCodigos,
@@ -415,7 +418,7 @@ fun MainMenuScreen(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = Color.White
+                                containerColor = colorTarjeta
                             )
                         ) {
                             Text(
@@ -475,8 +478,8 @@ fun MainMenuScreen(
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = AzulPrincipal,
-                                unfocusedContainerColor = Color.White,
-                                focusedContainerColor = Color.White
+                                unfocusedContainerColor = colorTarjeta,
+                                focusedContainerColor = colorTarjeta
                             )
                         )
                     }
@@ -506,7 +509,7 @@ fun MainMenuScreen(
                                                 .height(110.dp),
                                             shape = RoundedCornerShape(12.dp),
                                             colors = CardDefaults.cardColors(
-                                                containerColor = Color.White
+                                                containerColor = colorTarjeta
                                             ),
                                             elevation = CardDefaults.cardElevation(2.dp)
                                         ) {
@@ -608,7 +611,7 @@ fun MainMenuScreen(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
-                                containerColor = Color.White
+                                containerColor = colorTarjeta
                             )
                         ) {
                             Column(
@@ -632,7 +635,7 @@ fun MainMenuScreen(
                                 Text(
                                     "Sección informativa de ejemplo",
                                     fontSize = 11.sp,
-                                    color = Color.Gray
+                                    color = colorSecundario
                                 )
                             }
                         }
@@ -651,12 +654,18 @@ fun MenuOptionCard(
     icon: ImageVector,
     onClick: () -> Unit
 ) {
+    val esquema = MaterialTheme.colorScheme
+    val AzulPrincipal = esquema.primary
+    val AzulOscuro = esquema.onSurface
+    val colorTarjeta = esquema.surface
+    val colorSecundario = esquema.onSurfaceVariant
+
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = colorTarjeta
         )
     ) {
         Row(
@@ -685,7 +694,7 @@ fun MenuOptionCard(
                 Text(
                     text = subtitle,
                     fontSize = 12.sp,
-                    color = Color.Gray
+                    color = colorSecundario
                 )
             }
         }

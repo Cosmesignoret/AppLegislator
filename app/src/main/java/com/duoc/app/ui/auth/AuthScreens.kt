@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duoc.app.R
+import com.duoc.app.data.repository.UsuarioLocalRepository
 
 private val AzulPrincipal = Color(0xFF205C95)
 private val AzulOscuro = Color(0xFF174666)
@@ -252,6 +254,11 @@ fun RegistroScreen(
     var contrasena by remember { mutableStateOf("") }
     var errorMensaje by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
+    val usuarioRepository = remember(context) {
+        UsuarioLocalRepository(context)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -373,7 +380,12 @@ fun RegistroScreen(
                     contrasena.isBlank()
                 ) {
                     errorMensaje = "Todos los campos son obligatorios"
+                } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correo.trim()).matches()) {
+                    errorMensaje = "Ingresa un correo electrónico válido"
+                } else if (contrasena.length < 6) {
+                    errorMensaje = "La contraseña debe tener al menos 6 caracteres"
                 } else {
+                    usuarioRepository.guardarUsuario(nombre, correo)
                     onRegisterSuccess()
                 }
             },

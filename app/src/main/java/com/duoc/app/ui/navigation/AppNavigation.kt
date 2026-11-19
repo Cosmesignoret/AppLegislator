@@ -32,6 +32,7 @@ import com.duoc.app.ui.material.MaterialScreen
 import com.duoc.app.ui.notes.PersonalNotesScreen
 import com.duoc.app.ui.profile.ProfileScreen
 import com.duoc.app.ui.reader.ReaderScreen
+import com.duoc.app.ui.settings.ConfiguracionScreen
 
 import com.duoc.app.viewmodel.DocumentListViewModel
 import com.duoc.app.viewmodel.LegislativeChangesViewModel
@@ -39,7 +40,11 @@ import com.duoc.app.viewmodel.NoteViewModel
 import com.duoc.app.viewmodel.ReaderViewModel
 
 @Composable
-fun AppNavigation(noteViewModel: NoteViewModel) {
+fun AppNavigation(
+    noteViewModel: NoteViewModel,
+    modoOscuro: Boolean,
+    onModoOscuroChange: (Boolean) -> Unit
+) {
 
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -74,12 +79,13 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
 
         NavHost(
             navController = navController,
-            startDestination = startRoute
+            startDestination = startRoute,
+            modifier = Modifier.padding(innerPadding)
         ) {
 
             composable(Routes.HOME) {
                 PantallaInicio(
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier,
                     irLogin = {
                         navController.navigate(Routes.LOGIN)
                     },
@@ -91,7 +97,7 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
 
             composable(Routes.REGISTER) {
                 RegistroScreen(
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier,
                     onRegisterSuccess = {
                         navController.navigate(Routes.LOGIN) {
                             popUpTo(Routes.HOME)
@@ -106,7 +112,7 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
 
             composable(Routes.LOGIN) {
                 LoginValidadoScreen(
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier,
                     volver = {
                         navController.popBackStack()
                     },
@@ -140,6 +146,10 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                     onNavigateToProfile = {
                         navController.navigate(Routes.PROFILE)
                     },
+
+                    onNavigateToSettings = {
+                        navController.navigate(Routes.SETTINGS)
+                    },
                     onLogout = {
                         sesionManager.cerrarSesion()
 
@@ -155,6 +165,16 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
 
             composable(Routes.PROFILE) {
                 ProfileScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(Routes.SETTINGS) {
+                ConfiguracionScreen(
+                    modoOscuro = modoOscuro,
+                    onModoOscuroChange = onModoOscuroChange,
                     onBack = {
                         navController.popBackStack()
                     }
@@ -257,6 +277,7 @@ private object Routes {
     const val REGISTER = "register"
     const val MENU = "menu"
     const val PROFILE = "profile"
+    const val SETTINGS = "settings"
     const val NOTES = "notes"
     const val MATERIAL = "material"
     const val ARTICLES = "articles"

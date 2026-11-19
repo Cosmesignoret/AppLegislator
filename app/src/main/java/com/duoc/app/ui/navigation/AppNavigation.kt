@@ -1,3 +1,4 @@
+
 package com.duoc.app.ui.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,135 +16,246 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+
 import com.duoc.app.data.repository.MockDocumentRepository
 import com.duoc.app.data.repository.MockLegislativeChangeRepository
 import com.duoc.app.data.repository.UserPreferences
+import com.duoc.app.data.repository.SesionManager
+
 import com.duoc.app.ui.auth.LoginValidadoScreen
 import com.duoc.app.ui.auth.PantallaInicio
 import com.duoc.app.ui.auth.RegistroScreen
 import com.duoc.app.ui.history.LegislativeChangesScreen
-import com.duoc.app.viewmodel.LegislativeChangesViewModel
 import com.duoc.app.ui.list.DocumentListScreen
 import com.duoc.app.ui.mainmenu.MainMenuScreen
 import com.duoc.app.ui.material.MaterialScreen
 import com.duoc.app.ui.notes.PersonalNotesScreen
-import com.duoc.app.viewmodel.DocumentListViewModel
 import com.duoc.app.ui.reader.ReaderScreen
+
+import com.duoc.app.viewmodel.DocumentListViewModel
+import com.duoc.app.viewmodel.LegislativeChangesViewModel
 import com.duoc.app.viewmodel.NoteViewModel
 import com.duoc.app.viewmodel.ReaderViewModel
 
 @Composable
 fun AppNavigation(noteViewModel: NoteViewModel) {
+
     val navController = rememberNavController()
     val context = LocalContext.current
-    val repository = remember { MockDocumentRepository() }
-    val preferences = remember { UserPreferences(context) }
-    val changesRepository = remember { MockLegislativeChangeRepository() }
 
-    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+    val repository = remember {
+        MockDocumentRepository()
+    }
+
+    val preferences = remember(context) {
+        UserPreferences(context)
+    }
+
+    val changesRepository = remember {
+        MockLegislativeChangeRepository()
+    }
+
+    val sesionManager = remember(context) {
+        SesionManager(context)
+    }
+
+    // Comprueba la sesión al abrir la aplicación
+    val startRoute = remember(sesionManager) {
+        if (sesionManager.sesionIniciada()) {
+            Routes.MENU
+        } else {
+            Routes.HOME
+        }
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
+
         NavHost(
             navController = navController,
-            startDestination = Routes.HOME
+            startDestination = startRoute
         ) {
+
+            // PANTALLA INICIAL
             composable(Routes.HOME) {
                 PantallaInicio(
                     modifier = Modifier.padding(innerPadding),
-                    irLogin = { navController.navigate(Routes.LOGIN) },
-                    irRegistro = { navController.navigate(Routes.REGISTER) }
-                )
-            }
-
-            composable(Routes.LOGIN) {
-                LoginValidadoScreen(
-                    modifier = Modifier.padding(innerPadding),
-                    volver = { navController.popBackStack() },
-                    ingresar = {
-                        navController.navigate(Routes.MENU) {
-                            popUpTo(0) { inclusive = true }
-                        }
+                    irLogin = {
+                        navController.navigate(Routes.LOGIN)
+                    },
+                    irRegistro = {
+                        navController.navigate(Routes.REGISTER)
                     }
                 )
             }
 
+            // REGISTRO
             composable(Routes.REGISTER) {
                 RegistroScreen(
                     modifier = Modifier.padding(innerPadding),
                     onRegisterSuccess = {
                         navController.navigate(Routes.LOGIN) {
-                            popUpTo(0) { inclusive = true }
+                            popUpTo(Routes.HOME)
+                            launchSingleTop = true
                         }
                     },
-                    volver = { navController.popBackStack() }
+                    volver = {
+                        navController.popBackStack()
+                    }
                 )
             }
 
-            composable(Routes.MENU) {
-                MainMenuScreen(
-                    onNavigateToNotes = { navController.navigate(Routes.NOTES) },
-                    onNavigateToMaterial = { navController.navigate(Routes.MATERIAL) },
-                    onNavigateToLegalDocuments = { navController.navigate(Routes.ARTICLES) },
-                    onNavigateToHistoryChanges = { navController.navigate(Routes.LEGISLATIVE_CHANGES) },
-                    onLogout = {
-                        navController.navigate(Routes.HOME) {
-                            popUpTo(0) { inclusive = true }
+            // INICIO DE SESIÓN
+            composable(Routes.LOGIN) {
+                LoginValidadoScreen(
+                    modifier = Modifier.padding(innerPadding),
+                    volver = {
+                        navController.popBackStack()
+                    },
+                    ingresar = { correo, contrasena ->
+
+                        // Persistencia local provisional.
+                        // El ID real debe venir de la autenticación.
+                        sesionManager.guardarSesion(1)
+
+                        navController.navigate(Routes.MENU) {
+                            popUpTo(Routes.HOME) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
                         }
                     }
                 )
             }
 
+            // MENÚ PRINCIPAL
+            composable(Routes.MENU) {
+                MainMenuScreen(
+                    onNavigateToNotes = {
+                        navController.navigate(Routes.NOTES)
+                    },
+                    onNavigateToMaterial = {
+                        navController.navigate(Routes.MATERIAL)
+                    },
+                    onNavigateToLegalDocuments = {
+                        navController.navigate(Routes.ARTICLES)
+                    },
+                    onNavigateToHistoryChanges = {
+                        navController.navigate(
+                            Routes.LEGISLATIVE_CHANGES
+                        )
+                    },
+                    onLogout = {
+
+                        // Borra la sesión local
+                        sesionManager.cerrarSesion()
+
+                        navController.navigate(Routes.HOME) {
+                            popUpTo(Routes.MENU) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            // NOTAS PERSONALES
             composable(Routes.NOTES) {
                 PersonalNotesScreen(
                     viewModel = noteViewModel,
-                    onBack = { navController.popBackStack() }
+                    onBack = {
+                        navController.popBackStack()
+                    }
                 )
             }
 
+            // MATERIAL DE ESTUDIO
             composable(Routes.MATERIAL) {
-                MaterialScreen { navController.popBackStack() }
+                MaterialScreen {
+                    navController.popBackStack()
+                }
             }
 
+            // DOCUMENTOS LEGALES
             composable(Routes.ARTICLES) {
+
                 val vm: DocumentListViewModel = viewModel(
                     factory = viewModelFactory {
-                        initializer { DocumentListViewModel(repository) }
+                        initializer {
+                            DocumentListViewModel(repository)
+                        }
                     }
                 )
+
                 DocumentListScreen(
-                    onDocumentClick = { id -> navController.navigate(Routes.reader(id)) },
-                    onBack = { navController.popBackStack() },
+                    onDocumentClick = { id ->
+                        navController.navigate(
+                            Routes.reader(id)
+                        )
+                    },
+                    onBack = {
+                        navController.popBackStack()
+                    },
                     viewModel = vm
                 )
             }
 
+            // LECTOR DE DOCUMENTOS
             composable(
                 route = Routes.READER,
-                arguments = listOf(navArgument("id") { type = NavType.StringType })
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.StringType
+                    }
+                )
             ) { backStackEntry ->
-                val id = backStackEntry.arguments?.getString("id") ?: return@composable
+
+                val id = backStackEntry.arguments
+                    ?.getString("id")
+                    ?: return@composable
+
                 val vm: ReaderViewModel = viewModel(
                     factory = viewModelFactory {
-                        initializer { ReaderViewModel(repository, preferences) }
+                        initializer {
+                            ReaderViewModel(
+                                repository,
+                                preferences
+                            )
+                        }
                     }
                 )
+
                 ReaderScreen(
                     documentId = id,
-                    onBack = { navController.popBackStack() },
+                    onBack = {
+                        navController.popBackStack()
+                    },
                     viewModel = vm
                 )
             }
 
+            // CAMBIOS LEGISLATIVOS
             composable(Routes.LEGISLATIVE_CHANGES) {
+
                 val vm: LegislativeChangesViewModel = viewModel(
                     factory = viewModelFactory {
-                        initializer { LegislativeChangesViewModel(changesRepository) }
+                        initializer {
+                            LegislativeChangesViewModel(
+                                changesRepository
+                            )
+                        }
                     }
                 )
+
                 LegislativeChangesScreen(
-                    onBack = { navController.popBackStack() },
+                    onBack = {
+                        navController.popBackStack()
+                    },
                     viewModel = vm
                 )
             }
-
         }
     }
 }

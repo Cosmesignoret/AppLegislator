@@ -27,7 +27,7 @@ import com.duoc.app.utils.Validaciones
 fun LoginValidadoScreen(
     modifier: Modifier = Modifier,
     volver: () -> Unit,
-    ingresar: () -> Unit
+    ingresar: (String, String) -> Unit
 ) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
@@ -154,7 +154,7 @@ fun LoginValidadoScreen(
                     !Validaciones.contrasenaValida(contrasena)
 
                 if (!errorCorreo && !errorContrasena) {
-                    ingresar()
+                    ingresar(correo, contrasena)
                 }
             },
             modifier = Modifier

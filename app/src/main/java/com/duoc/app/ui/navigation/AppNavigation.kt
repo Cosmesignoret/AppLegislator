@@ -30,6 +30,7 @@ import com.duoc.app.ui.list.DocumentListScreen
 import com.duoc.app.ui.mainmenu.MainMenuScreen
 import com.duoc.app.ui.material.MaterialScreen
 import com.duoc.app.ui.notes.PersonalNotesScreen
+import com.duoc.app.ui.profile.ProfileScreen
 import com.duoc.app.ui.reader.ReaderScreen
 
 import com.duoc.app.viewmodel.DocumentListViewModel
@@ -59,7 +60,6 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
         SesionManager(context)
     }
 
-    // Comprueba la sesión al abrir la aplicación
     val startRoute = remember(sesionManager) {
         if (sesionManager.sesionIniciada()) {
             Routes.MENU
@@ -77,7 +77,6 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
             startDestination = startRoute
         ) {
 
-            // PANTALLA INICIAL
             composable(Routes.HOME) {
                 PantallaInicio(
                     modifier = Modifier.padding(innerPadding),
@@ -90,7 +89,6 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                 )
             }
 
-            // REGISTRO
             composable(Routes.REGISTER) {
                 RegistroScreen(
                     modifier = Modifier.padding(innerPadding),
@@ -106,17 +104,13 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                 )
             }
 
-            // INICIO DE SESIÓN
             composable(Routes.LOGIN) {
                 LoginValidadoScreen(
                     modifier = Modifier.padding(innerPadding),
                     volver = {
                         navController.popBackStack()
                     },
-                    ingresar = { correo, contrasena ->
-
-                        // Persistencia local provisional.
-                        // El ID real debe venir de la autenticación.
+                    ingresar = { _, _ ->
                         sesionManager.guardarSesion(1)
 
                         navController.navigate(Routes.MENU) {
@@ -129,7 +123,6 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                 )
             }
 
-            // MENÚ PRINCIPAL
             composable(Routes.MENU) {
                 MainMenuScreen(
                     onNavigateToNotes = {
@@ -142,13 +135,12 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                         navController.navigate(Routes.ARTICLES)
                     },
                     onNavigateToHistoryChanges = {
-                        navController.navigate(
-                            Routes.LEGISLATIVE_CHANGES
-                        )
+                        navController.navigate(Routes.LEGISLATIVE_CHANGES)
+                    },
+                    onNavigateToProfile = {
+                        navController.navigate(Routes.PROFILE)
                     },
                     onLogout = {
-
-                        // Borra la sesión local
                         sesionManager.cerrarSesion()
 
                         navController.navigate(Routes.HOME) {
@@ -161,7 +153,14 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                 )
             }
 
-            // NOTAS PERSONALES
+            composable(Routes.PROFILE) {
+                ProfileScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
+            }
+
             composable(Routes.NOTES) {
                 PersonalNotesScreen(
                     viewModel = noteViewModel,
@@ -171,16 +170,13 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                 )
             }
 
-            // MATERIAL DE ESTUDIO
             composable(Routes.MATERIAL) {
                 MaterialScreen {
                     navController.popBackStack()
                 }
             }
 
-            // DOCUMENTOS LEGALES
             composable(Routes.ARTICLES) {
-
                 val vm: DocumentListViewModel = viewModel(
                     factory = viewModelFactory {
                         initializer {
@@ -191,9 +187,7 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
 
                 DocumentListScreen(
                     onDocumentClick = { id ->
-                        navController.navigate(
-                            Routes.reader(id)
-                        )
+                        navController.navigate(Routes.reader(id))
                     },
                     onBack = {
                         navController.popBackStack()
@@ -202,7 +196,6 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                 )
             }
 
-            // LECTOR DE DOCUMENTOS
             composable(
                 route = Routes.READER,
                 arguments = listOf(
@@ -236,9 +229,7 @@ fun AppNavigation(noteViewModel: NoteViewModel) {
                 )
             }
 
-            // CAMBIOS LEGISLATIVOS
             composable(Routes.LEGISLATIVE_CHANGES) {
-
                 val vm: LegislativeChangesViewModel = viewModel(
                     factory = viewModelFactory {
                         initializer {
@@ -265,6 +256,7 @@ private object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val MENU = "menu"
+    const val PROFILE = "profile"
     const val NOTES = "notes"
     const val MATERIAL = "material"
     const val ARTICLES = "articles"

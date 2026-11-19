@@ -1,11 +1,17 @@
 
 package com.duoc.app.ui.mainmenu
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
@@ -14,12 +20,20 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.duoc.app.data.repository.AvatarManager
 
 private val AzulPrincipal = Color(0xFF205C95)
 private val AzulOscuro = Color(0xFF174666)
@@ -33,9 +47,42 @@ fun MainMenuScreen(
     onNavigateToMaterial: () -> Unit,
     onLogout: () -> Unit,
     onNavigateToLegalDocuments: () -> Unit,
-    onNavigateToHistoryChanges: () -> Unit
+    onNavigateToHistoryChanges: () -> Unit,
+    onNavigateToProfile: () -> Unit
 ) {
     var busqueda by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val avatarManager = remember(context) { AvatarManager(context) }
+
+    var avatarVersion by remember { mutableIntStateOf(0) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                avatarVersion++
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val avatarBitmap = remember(avatarVersion) {
+        avatarManager.obtenerAvatar()?.let { uri ->
+            try {
+                context.contentResolver.openInputStream(uri)?.use {
+                    BitmapFactory.decodeStream(it)?.asImageBitmap()
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
 
     val modulos = listOf(
         "Código Civil",
@@ -51,12 +98,40 @@ fun MainMenuScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "AppLegislaor - Principal",
+                        "AppLegislator - Principal",
                         color = Color.White,
                         fontSize = 20.sp
                     )
                 },
                 actions = {
+                    Box(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color.White)
+                            .clickable {
+                                onNavigateToProfile()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (avatarBitmap != null) {
+                            Image(
+                                bitmap = avatarBitmap,
+                                contentDescription = "Ir a mi perfil",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Ir a mi perfil",
+                                tint = AzulPrincipal,
+                                modifier = Modifier.size(36.dp)
+                            )
+                        }
+                    }
+
                     IconButton(onClick = onLogout) {
                         Icon(
                             Icons.AutoMirrored.Filled.ExitToApp,
@@ -209,12 +284,16 @@ fun MainMenuScreen(
                             fontWeight = FontWeight.Bold,
                             color = AzulOscuro
                         )
+
                         Spacer(Modifier.height(6.dp))
+
                         Text(
                             "Aquí aparecerán las novedades y reformas de la legislación chilena.",
                             fontSize = 13.sp
                         )
+
                         Spacer(Modifier.height(6.dp))
+
                         Text(
                             "Sección informativa de ejemplo",
                             fontSize = 11.sp,
@@ -261,7 +340,7 @@ fun MainMenuScreen(
             }
 
             item {
-                MenuOptionCard (
+                MenuOptionCard(
                     title = "Cambios Legislativos",
                     subtitle = "Historial de cambios legislativos",
                     icon = Icons.Default.SyncLock,

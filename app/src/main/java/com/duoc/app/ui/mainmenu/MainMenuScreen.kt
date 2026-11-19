@@ -2,11 +2,14 @@
 package com.duoc.app.ui.mainmenu
 
 import android.graphics.BitmapFactory
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -15,6 +18,11 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SyncLock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,6 +42,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.duoc.app.data.repository.AvatarManager
+import com.duoc.app.data.repository.UsuarioLocalRepository
+import kotlinx.coroutines.launch
 
 private val AzulPrincipal = Color(0xFF205C95)
 private val AzulOscuro = Color(0xFF174666)
@@ -48,15 +58,36 @@ fun MainMenuScreen(
     onLogout: () -> Unit,
     onNavigateToLegalDocuments: () -> Unit,
     onNavigateToHistoryChanges: () -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onNavigateToNotifications: () -> Unit = {}
 ) {
-    var busqueda by remember { mutableStateOf("") }
-
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val avatarManager = remember(context) { AvatarManager(context) }
+    val usuarioRepository = remember(context) { UsuarioLocalRepository(context) }
 
+    val nombre = remember(context) {
+        usuarioRepository.obtenerNombre()
+    }
+
+    val primerNombre = nombre.trim().substringBefore(" ").ifBlank {
+        "Usuario"
+    }
+
+    var busqueda by remember { mutableStateOf("") }
     var avatarVersion by remember { mutableIntStateOf(0) }
+    var mostrarCodigos by remember { mutableStateOf(false) }
+
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+
+    BackHandler(drawerState.isOpen || mostrarCodigos) {
+        if (drawerState.isOpen) {
+            scope.launch { drawerState.close() }
+        } else {
+            mostrarCodigos = false
+        }
+    }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -92,260 +123,521 @@ fun MainMenuScreen(
         "Actividades"
     )
 
-    Scaffold(
-        containerColor = FondoCeleste,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "AppLegislator - Principal",
-                        color = Color.White,
-                        fontSize = 20.sp
-                    )
-                },
-                actions = {
-                    Box(
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet(
+                drawerContainerColor = Color.White,
+                modifier = Modifier.width(300.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    Column(
                         modifier = Modifier
-                            .padding(end = 8.dp)
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color.White)
-                            .clickable {
-                                onNavigateToProfile()
-                            },
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .background(AzulPrincipal)
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        if (avatarBitmap != null) {
-                            Image(
-                                bitmap = avatarBitmap,
-                                contentDescription = "Ir a mi perfil",
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                        Box(
+                            modifier = Modifier
+                                .size(70.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .clickable {
+                                    scope.launch { drawerState.close() }
+                                    onNavigateToProfile()
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (avatarBitmap != null) {
+                                Image(
+                                    bitmap = avatarBitmap,
+                                    contentDescription = "Mi perfil",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.AccountCircle,
+                                    contentDescription = "Mi perfil",
+                                    modifier = Modifier.size(60.dp),
+                                    tint = AzulPrincipal
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = nombre.ifBlank { "Mi cuenta" },
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = "AppLegislator",
+                            color = Color.White.copy(alpha = 0.85f),
+                            fontSize = 13.sp
+                        )
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    NavigationDrawerItem(
+                        label = { Text("Inicio") },
+                        selected = !mostrarCodigos,
+                        icon = { Icon(Icons.Default.Home, null) },
+                        onClick = {
+                            mostrarCodigos = false
+                            scope.launch { drawerState.close() }
+                        }
+                    )
+
+                    NavigationDrawerItem(
+                        label = { Text("Mis notas de estudio") },
+                        selected = false,
+                        icon = { Icon(Icons.Default.Edit, null) },
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigateToNotes()
+                        }
+                    )
+
+                    NavigationDrawerItem(
+                        label = { Text("Material complementario") },
+                        selected = false,
+                        icon = { Icon(Icons.Default.Book, null) },
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigateToMaterial()
+                        }
+                    )
+
+                    NavigationDrawerItem(
+                        label = { Text("Artículos legales") },
+                        selected = false,
+                        icon = { Icon(Icons.Default.Description, null) },
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigateToLegalDocuments()
+                        }
+                    )
+
+                    NavigationDrawerItem(
+                        label = { Text("Cambios legislativos") },
+                        selected = false,
+                        icon = { Icon(Icons.Default.SyncLock, null) },
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigateToHistoryChanges()
+                        }
+                    )
+
+                    HorizontalDivider(Modifier.padding(vertical = 12.dp))
+
+                    NavigationDrawerItem(
+                        label = { Text("Mi perfil") },
+                        selected = false,
+                        icon = { Icon(Icons.Default.Person, null) },
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onNavigateToProfile()
+                        }
+                    )
+
+
+                    NavigationDrawerItem(
+                        label = {
+                            Text(
+                                "Configuración (próximamente)",
+                                color = Color.Gray
                             )
-                        } else {
+                        },
+                        selected = false,
+                        icon = {
                             Icon(
-                                imageVector = Icons.Default.AccountCircle,
-                                contentDescription = "Ir a mi perfil",
-                                tint = AzulPrincipal,
-                                modifier = Modifier.size(36.dp)
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = null,
+                                tint = Color.Gray
+                            )
+                        },
+                        onClick = {}
+                    )
+
+
+                    NavigationDrawerItem(
+                        label = { Text("Cerrar sesión") },
+                        selected = false,
+                        icon = {
+                            Icon(Icons.AutoMirrored.Filled.ExitToApp, null)
+                        },
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onLogout()
+                        }
+                    )
+                }
+            }
+        }
+    ) {
+        Scaffold(
+            containerColor = FondoCeleste,
+            topBar = {
+                TopAppBar(
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                scope.launch { drawerState.open() }
+                            }
+                        ) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = "Abrir menú",
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    title = {
+                        Text(
+                            "AppLegislator",
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    actions = {
+                        IconButton(onClick = onNavigateToNotifications) {
+                            Icon(
+                                Icons.Default.Notifications,
+                                contentDescription = "Notificaciones",
+                                tint = Color.White
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .padding(end = 12.dp)
+                                .size(38.dp)
+                                .clip(CircleShape)
+                                .background(Color.White)
+                                .clickable { onNavigateToProfile() },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (avatarBitmap != null) {
+                                Image(
+                                    bitmap = avatarBitmap,
+                                    contentDescription = "Ir a mi perfil",
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.AccountCircle,
+                                    contentDescription = "Ir a mi perfil",
+                                    tint = AzulPrincipal,
+                                    modifier = Modifier.size(34.dp)
+                                )
+                            }
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = AzulPrincipal
+                    )
+                )
+            },
+            bottomBar = {
+                NavigationBar(
+                    containerColor = Color.White
+                ) {
+                    NavigationBarItem(
+                        selected = !mostrarCodigos,
+                        onClick = { mostrarCodigos = false },
+                        icon = { Icon(Icons.Default.Home, null) },
+                        label = { Text("Inicio") }
+                    )
+
+                    NavigationBarItem(
+                        selected = mostrarCodigos,
+                        onClick = { mostrarCodigos = true },
+                        icon = { Icon(Icons.Default.Book, null) },
+                        label = { Text("Códigos") }
+                    )
+
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onNavigateToNotes,
+                        icon = { Icon(Icons.Default.Edit, null) },
+                        label = { Text("Notas") }
+                    )
+
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onNavigateToNotifications,
+                        icon = { Icon(Icons.Default.Notifications, null) },
+                        label = { Text("Avisos") }
+                    )
+
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onNavigateToProfile,
+                        icon = { Icon(Icons.Default.Person, null) },
+                        label = { Text("Perfil") }
+                    )
+                }
+            }
+        ) { innerPadding ->
+
+            if (mostrarCodigos) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        "Códigos y contenidos",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AzulOscuro
+                    )
+
+                    Text(
+                        "Selecciona una sección para consultar.",
+                        color = AzulOscuro
+                    )
+
+                    modulos.forEach { modulo ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.White
+                            )
+                        ) {
+                            Text(
+                                text = modulo,
+                                modifier = Modifier.padding(20.dp),
+                                fontWeight = FontWeight.Medium,
+                                color = AzulOscuro
                             )
                         }
                     }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = AzulTarjetas
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(20.dp)
+                            ) {
+                                Text(
+                                    "¡Hola, $primerNombre! 👋",
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = AzulOscuro
+                                )
 
-                    IconButton(onClick = onLogout) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Cerrar sesión",
-                            tint = Color.White
+                                Spacer(Modifier.height(6.dp))
+
+                                Text(
+                                    "Bienvenido de nuevo a AppLegislator.",
+                                    fontSize = 14.sp,
+                                    color = AzulOscuro
+                                )
+                            }
+                        }
+                    }
+
+                    item {
+                        OutlinedTextField(
+                            value = busqueda,
+                            onValueChange = { busqueda = it },
+                            label = { Text("Buscar leyes o artículos") },
+                            placeholder = { Text("Escribe aquí...") },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(12.dp),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = AzulPrincipal,
+                                unfocusedContainerColor = Color.White,
+                                focusedContainerColor = Color.White
+                            )
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AzulPrincipal
-                )
-            )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = AzulTarjetas
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+
+                    item {
                         Text(
-                            "Bienvenido a AppLegislator",
-                            fontSize = 20.sp,
+                            "Explorar contenidos",
+                            fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
                             color = AzulOscuro
                         )
-                        Text(
-                            "Tu espacio de estudio jurídico.",
-                            fontSize = 14.sp,
-                            color = AzulOscuro
-                        )
                     }
-                }
-            }
 
-            item {
-                OutlinedTextField(
-                    value = busqueda,
-                    onValueChange = { busqueda = it },
-                    label = { Text("Buscar leyes o artículos") },
-                    placeholder = { Text("Escribe aquí...") },
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = AzulPrincipal,
-                        unfocusedContainerColor = Color.White,
-                        focusedContainerColor = Color.White
-                    )
-                )
-            }
-
-            item {
-                Text(
-                    "Explorar contenidos",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AzulOscuro
-                )
-            }
-
-            item {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    modulos.chunked(3).forEach { fila ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    item {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            fila.forEach { modulo ->
-                                Card(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(110.dp),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = Color.White
-                                    ),
-                                    elevation = CardDefaults.cardElevation(2.dp)
+                            modulos.chunked(3).forEach { fila ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(8.dp),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Text(
-                                            text = when (modulo) {
-                                                "Código Civil" -> "⚖"
-                                                "Código Penal" -> "▤"
-                                                "Contenidos" -> "▣"
-                                                "Aclaraciones" -> "?"
-                                                else -> "✓"
-                                            },
-                                            fontSize = 30.sp,
-                                            color = AzulPrincipal
-                                        )
+                                    fila.forEach { modulo ->
+                                        Card(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .height(110.dp),
+                                            shape = RoundedCornerShape(12.dp),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = Color.White
+                                            ),
+                                            elevation = CardDefaults.cardElevation(2.dp)
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxSize()
+                                                    .padding(8.dp),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center
+                                            ) {
+                                                Text(
+                                                    text = when (modulo) {
+                                                        "Código Civil" -> "⚖"
+                                                        "Código Penal" -> "▤"
+                                                        "Contenidos" -> "▣"
+                                                        "Aclaraciones" -> "?"
+                                                        else -> "✓"
+                                                    },
+                                                    fontSize = 30.sp,
+                                                    color = AzulPrincipal
+                                                )
 
-                                        Spacer(Modifier.height(8.dp))
+                                                Spacer(Modifier.height(8.dp))
 
-                                        Text(
-                                            text = modulo,
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            textAlign = TextAlign.Center,
-                                            color = AzulOscuro
-                                        )
+                                                Text(
+                                                    text = modulo,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    textAlign = TextAlign.Center,
+                                                    color = AzulOscuro
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    repeat(3 - fila.size) {
+                                        Spacer(Modifier.weight(1f))
                                     }
                                 }
                             }
+                        }
+                    }
 
-                            repeat(3 - fila.size) {
-                                Spacer(Modifier.weight(1f))
+                    item {
+                        Text(
+                            "Accesos rápidos",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AzulOscuro
+                        )
+                    }
+
+                    item {
+                        MenuOptionCard(
+                            title = "Mis Notas de Estudio",
+                            subtitle = "Crea y guarda tus apuntes",
+                            icon = Icons.Default.Edit,
+                            onClick = onNavigateToNotes
+                        )
+                    }
+
+                    item {
+                        MenuOptionCard(
+                            title = "Material Complementario",
+                            subtitle = "Consulta jurisprudencia y doctrina",
+                            icon = Icons.Default.Book,
+                            onClick = onNavigateToMaterial
+                        )
+                    }
+
+                    item {
+                        MenuOptionCard(
+                            title = "Artículos Legales",
+                            subtitle = "Buscar en el archivo legal",
+                            icon = Icons.Default.Description,
+                            onClick = onNavigateToLegalDocuments
+                        )
+                    }
+
+                    item {
+                        MenuOptionCard(
+                            title = "Cambios Legislativos",
+                            subtitle = "Historial de cambios legislativos",
+                            icon = Icons.Default.SyncLock,
+                            onClick = onNavigateToHistoryChanges
+                        )
+                    }
+
+                    item {
+                        Text(
+                            "Alertas de reformas",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = AzulOscuro
+                        )
+                    }
+
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Color.White
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Text(
+                                    "Actualizaciones legales",
+                                    fontWeight = FontWeight.Bold,
+                                    color = AzulOscuro
+                                )
+
+                                Spacer(Modifier.height(6.dp))
+
+                                Text(
+                                    "Aquí aparecerán las novedades y reformas de la legislación chilena.",
+                                    fontSize = 13.sp
+                                )
+
+                                Spacer(Modifier.height(6.dp))
+
+                                Text(
+                                    "Sección informativa de ejemplo",
+                                    fontSize = 11.sp,
+                                    color = Color.Gray
+                                )
                             }
                         }
                     }
                 }
-            }
-
-            item {
-                Text(
-                    "Alertas de Reformas",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AzulOscuro
-                )
-            }
-
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            "Actualizaciones legales",
-                            fontWeight = FontWeight.Bold,
-                            color = AzulOscuro
-                        )
-
-                        Spacer(Modifier.height(6.dp))
-
-                        Text(
-                            "Aquí aparecerán las novedades y reformas de la legislación chilena.",
-                            fontSize = 13.sp
-                        )
-
-                        Spacer(Modifier.height(6.dp))
-
-                        Text(
-                            "Sección informativa de ejemplo",
-                            fontSize = 11.sp,
-                            color = Color.Gray
-                        )
-                    }
-                }
-            }
-
-            item {
-                Text(
-                    "Opciones del Sistema",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AzulOscuro
-                )
-            }
-
-            item {
-                MenuOptionCard(
-                    title = "Mis Notas de Estudio",
-                    subtitle = "Crea y guarda apuntes locales con foto y Room",
-                    icon = Icons.Default.Edit,
-                    onClick = onNavigateToNotes
-                )
-            }
-
-            item {
-                MenuOptionCard(
-                    title = "Material Complementario",
-                    subtitle = "Consulta jurisprudencia y doctrina",
-                    icon = Icons.Default.Book,
-                    onClick = onNavigateToMaterial
-                )
-            }
-
-            item {
-                MenuOptionCard(
-                    title = "Artículos Legales",
-                    subtitle = "Buscar en el archivo legal",
-                    icon = Icons.Default.Description,
-                    onClick = onNavigateToLegalDocuments
-                )
-            }
-
-            item {
-                MenuOptionCard(
-                    title = "Cambios Legislativos",
-                    subtitle = "Historial de cambios legislativos",
-                    icon = Icons.Default.SyncLock,
-                    onClick = onNavigateToHistoryChanges
-                )
             }
         }
     }
@@ -389,6 +681,7 @@ fun MenuOptionCard(
                     fontWeight = FontWeight.Bold,
                     color = AzulOscuro
                 )
+
                 Text(
                     text = subtitle,
                     fontSize = 12.sp,

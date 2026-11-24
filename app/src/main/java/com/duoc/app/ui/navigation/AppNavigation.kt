@@ -1,4 +1,3 @@
-
 package com.duoc.app.ui.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,10 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 
-import com.duoc.app.data.repository.MockDocumentRepository
-import com.duoc.app.data.repository.MockLegislativeChangeRepository
-import com.duoc.app.data.repository.UserPreferences
-import com.duoc.app.data.repository.SesionManager
+import com.duoc.app.data.repository.AppContainer
 
 import com.duoc.app.ui.auth.LoginValidadoScreen
 import com.duoc.app.ui.auth.PantallaInicio
@@ -48,25 +44,10 @@ fun AppNavigation(
 
     val navController = rememberNavController()
     val context = LocalContext.current
+    val container = remember(context) { AppContainer(context) }
 
-    val repository = remember {
-        MockDocumentRepository()
-    }
-
-    val preferences = remember(context) {
-        UserPreferences(context)
-    }
-
-    val changesRepository = remember {
-        MockLegislativeChangeRepository()
-    }
-
-    val sesionManager = remember(context) {
-        SesionManager(context)
-    }
-
-    val startRoute = remember(sesionManager) {
-        if (sesionManager.sesionIniciada()) {
+    val startRoute = remember(container) {
+        if (container.sesionManager.sesionIniciada()) {
             Routes.MENU
         } else {
             Routes.HOME
@@ -98,11 +79,15 @@ fun AppNavigation(
             composable(Routes.REGISTER) {
                 RegistroScreen(
                     modifier = Modifier,
-                    onRegisterSuccess = {
-                        navController.navigate(Routes.LOGIN) {
-                            popUpTo(Routes.HOME)
-                            launchSingleTop = true
-                        }
+                    registrar = { nombre, correo, contrasena ->
+                        container.authRepository.register(nombre, correo, contrasena)
+                            .onSuccess {
+                                container.usuarioLocalRepository.guardarUsuario(nombre, correo)
+                                navController.navigate(Routes.LOGIN) {
+                                    popUpTo(Routes.HOME)
+                                    launchSingleTop = true
+                                }
+                            }
                     },
                     volver = {
                         navController.popBackStack()
@@ -116,15 +101,17 @@ fun AppNavigation(
                     volver = {
                         navController.popBackStack()
                     },
-                    ingresar = { _, _ ->
-                        sesionManager.guardarSesion(1)
-
-                        navController.navigate(Routes.MENU) {
-                            popUpTo(Routes.HOME) {
-                                inclusive = true
+                    ingresar = { correo: String, contrasena: String ->
+                        container.authRepository.login(correo, contrasena)
+                            .onSuccess {
+                                navController.navigate(Routes.MENU) {
+                                    popUpTo(Routes.HOME) {
+                                        inclusive = true
+                                    }
+                                    launchSingleTop = true
+                                }
                             }
-                            launchSingleTop = true
-                        }
+                            .map { }
                     }
                 )
             }
@@ -146,12 +133,11 @@ fun AppNavigation(
                     onNavigateToProfile = {
                         navController.navigate(Routes.PROFILE)
                     },
-
                     onNavigateToSettings = {
                         navController.navigate(Routes.SETTINGS)
                     },
                     onLogout = {
-                        sesionManager.cerrarSesion()
+                        container.sesionManager.cerrarSesion()
 
                         navController.navigate(Routes.HOME) {
                             popUpTo(Routes.MENU) {
@@ -200,7 +186,7 @@ fun AppNavigation(
                 val vm: DocumentListViewModel = viewModel(
                     factory = viewModelFactory {
                         initializer {
-                            DocumentListViewModel(repository)
+                            DocumentListViewModel(container.documentRepository)
                         }
                     }
                 )
@@ -233,8 +219,8 @@ fun AppNavigation(
                     factory = viewModelFactory {
                         initializer {
                             ReaderViewModel(
-                                repository,
-                                preferences
+                                container.documentRepository,
+                                container.preferences
                             )
                         }
                     }
@@ -254,7 +240,7 @@ fun AppNavigation(
                     factory = viewModelFactory {
                         initializer {
                             LegislativeChangesViewModel(
-                                changesRepository
+                                container.changesRepository
                             )
                         }
                     }

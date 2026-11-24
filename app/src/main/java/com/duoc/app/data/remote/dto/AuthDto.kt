@@ -8,3 +8,9 @@ data class LoginRequestDto(
 data class LoginResponseDto(
     val token: String
 )
+
+data class RegisterRequestDto(
+    val nombre: String,
+    val correo: String,
+    val contrasena: String
+)

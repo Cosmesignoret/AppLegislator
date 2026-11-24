@@ -5,6 +5,6 @@ data class LegislativeChange(
     val title: String,
     val date: String,
     val description: String,
-    val currentSegments: List<DiffSegment>,
-    val previousSegments: List<DiffSegment>
+    val currentSegments: List<TextSegment>,
+    val previousSegments: List<TextSegment>
 )

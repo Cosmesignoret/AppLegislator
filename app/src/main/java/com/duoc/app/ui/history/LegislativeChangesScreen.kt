@@ -30,7 +30,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.duoc.app.data.model.DiffSegment
+import com.duoc.app.data.model.TextSegment
 import com.duoc.app.data.model.LegislativeChange
 import com.duoc.app.data.model.SegmentType
 import com.duoc.app.viewmodel.LegislativeChangesViewModel
@@ -128,7 +128,7 @@ private fun LegislativeChangeCard(change: LegislativeChange) {
 }
 
 private fun buildHighlightedText(
-    segments: List<DiffSegment>,
+    segments: List<TextSegment>,
     highlightType: SegmentType,
     highlightColor: Color
 ): AnnotatedString = buildAnnotatedString {

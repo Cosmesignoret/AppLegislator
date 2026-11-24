@@ -1,20 +1,19 @@
-
 package com.duoc.app.ui.auth
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,7 +21,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.duoc.app.R
-import com.duoc.app.data.repository.UsuarioLocalRepository
+import kotlinx.coroutines.launch
 
 private val AzulPrincipal = Color(0xFF205C95)
 private val AzulOscuro = Color(0xFF174666)
@@ -106,10 +105,7 @@ fun PantallaInicio(
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = Blanco
             ),
-            border = androidx.compose.foundation.BorderStroke(
-                1.dp,
-                AzulPrincipal
-            )
+            border = BorderStroke(1.dp, AzulPrincipal)
         ) {
             Text(
                 text = "Registrarse",
@@ -121,14 +117,17 @@ fun PantallaInicio(
 }
 
 @Composable
-fun LoginScreen(
+fun LoginValidadoScreen(
     modifier: Modifier = Modifier,
-    onLoginSuccess: () -> Unit,
+    ingresar: suspend (correo: String, contrasena: String) -> Result<Unit>,
     volver: () -> Unit
 ) {
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var errorMensaje by remember { mutableStateOf("") }
+    var cargando by remember { mutableStateOf(false) }
+
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = modifier
@@ -140,7 +139,7 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
-            painter = painterResource(id = R.drawable.balanza),
+            painter = painterResource(id = R.drawable.balanza2),
             contentDescription = "Logo AppLegislator",
             modifier = Modifier.size(120.dp),
             contentScale = ContentScale.Fit
@@ -166,6 +165,7 @@ fun LoginScreen(
             label = { Text("Correo") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            enabled = !cargando,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
             ),
@@ -192,6 +192,7 @@ fun LoginScreen(
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            enabled = !cargando,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = AzulOscuro,
@@ -214,10 +215,33 @@ fun LoginScreen(
             onClick = {
                 if (correo.isBlank() || contrasena.isBlank()) {
                     errorMensaje = "Por favor, completa los campos"
-                } else {
-                    onLoginSuccess()
+                    return@Button
+                }
+                scope.launch {
+                    cargando = true
+                    errorMensaje = ""
+                    ingresar(correo.trim(), contrasena)
+                        .onFailure { e ->
+                            errorMensaje = if (e is retrofit2.HttpException) {
+                                val errorBody = e.response()?.errorBody()?.string()
+                                if (!errorBody.isNullOrEmpty()) {
+                                    try {
+                                        org.json.JSONObject(errorBody)
+                                            .optString("message", "El correo o la contraseña es incorrecto")
+                                    } catch (jsonEx: Exception) {
+                                        errorBody
+                                    }
+                                } else {
+                                    "El correo o la contraseña es incorrecto"
+                                }
+                            } else {
+                                e.message ?: "El correo o la contraseña es incorrecto"
+                            }
+                        }
+                    cargando = false
                 }
             },
+            enabled = !cargando,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -226,13 +250,22 @@ fun LoginScreen(
                 containerColor = AzulPrincipal
             )
         ) {
-            Text("Iniciar sesión", color = Blanco)
+            if (cargando) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(22.dp),
+                    color = Blanco,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text("Iniciar sesión", color = Blanco)
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedButton(
             onClick = volver,
+            enabled = !cargando,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = Blanco
@@ -246,18 +279,16 @@ fun LoginScreen(
 @Composable
 fun RegistroScreen(
     modifier: Modifier = Modifier,
-    onRegisterSuccess: () -> Unit,
+    registrar: suspend (nombre: String, correo: String, contrasena: String) -> Result<Unit>,
     volver: () -> Unit
 ) {
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var contrasena by remember { mutableStateOf("") }
     var errorMensaje by remember { mutableStateOf("") }
+    var cargando by remember { mutableStateOf(false) }
 
-    val context = LocalContext.current
-    val usuarioRepository = remember(context) {
-        UsuarioLocalRepository(context)
-    }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = modifier
@@ -303,6 +334,7 @@ fun RegistroScreen(
             label = { Text("Nombre completo") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            enabled = !cargando,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedTextColor = AzulOscuro,
@@ -325,6 +357,7 @@ fun RegistroScreen(
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            enabled = !cargando,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
             ),
@@ -350,6 +383,7 @@ fun RegistroScreen(
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            enabled = !cargando,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
@@ -380,15 +414,27 @@ fun RegistroScreen(
                     contrasena.isBlank()
                 ) {
                     errorMensaje = "Todos los campos son obligatorios"
-                } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correo.trim()).matches()) {
+                    return@Button
+                }
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correo.trim()).matches()) {
                     errorMensaje = "Ingresa un correo electrónico válido"
-                } else if (contrasena.length < 6) {
+                    return@Button
+                }
+                if (contrasena.length < 6) {
                     errorMensaje = "La contraseña debe tener al menos 6 caracteres"
-                } else {
-                    usuarioRepository.guardarUsuario(nombre, correo)
-                    onRegisterSuccess()
+                    return@Button
+                }
+                scope.launch {
+                    cargando = true
+                    errorMensaje = ""
+                    registrar(nombre.trim(), correo.trim(), contrasena)
+                        .onFailure { e ->
+                            errorMensaje = e.message ?: "No se pudo registrar"
+                        }
+                    cargando = false
                 }
             },
+            enabled = !cargando,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
@@ -397,17 +443,26 @@ fun RegistroScreen(
                 containerColor = AzulPrincipal
             )
         ) {
-            Text(
-                text = "Registrarse",
-                color = Blanco,
-                fontWeight = FontWeight.Bold
-            )
+            if (cargando) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(22.dp),
+                    color = Blanco,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = "Registrarse",
+                    color = Blanco,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedButton(
             onClick = volver,
+            enabled = !cargando,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),

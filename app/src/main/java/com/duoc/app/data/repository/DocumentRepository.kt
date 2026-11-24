@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface DocumentRepository {
     fun getDocuments(): Flow<List<LegalDocument>>
     fun getDocument(id: String): Flow<LegalDocument?>
+    suspend fun refresh()
 }

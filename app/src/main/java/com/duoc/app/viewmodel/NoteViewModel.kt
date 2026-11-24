@@ -3,8 +3,9 @@ package com.duoc.app.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.duoc.app.data.repository.AppDatabase
 import com.duoc.app.data.model.NoteEntity
+import com.duoc.app.data.remote.client.RetrofitClient
+import com.duoc.app.data.repository.AppDatabase
 import com.duoc.app.data.repository.NoteRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,8 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         val dao = AppDatabase.getDatabase(application).noteDao()
-        repository = NoteRepository(dao)
+        val api = RetrofitClient(application).noteApi
+        repository = NoteRepository(dao, api)
         notesState = repository.allNotes.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -42,6 +44,12 @@ class NoteViewModel(application: Application) : AndroidViewModel(application) {
     fun deleteNote(note: NoteEntity) {
         viewModelScope.launch {
             repository.delete(note)
+        }
+    }
+
+    fun syncNotes() {
+        viewModelScope.launch {
+            repository.syncWithServer()
         }
     }
 }

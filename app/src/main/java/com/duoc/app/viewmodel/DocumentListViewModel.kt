@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class DocumentListViewModel(private val repository: DocumentRepository) : ViewModel() {
 
@@ -22,11 +23,17 @@ class DocumentListViewModel(private val repository: DocumentRepository) : ViewMo
                 if (text.isBlank()) docs
                 else docs.filter {
                     it.title.contains(text, ignoreCase = true) ||
-                        it.category.contains(text, ignoreCase = true) ||
-                        it.content.contains(text, ignoreCase = true)
+                            it.category.contains(text, ignoreCase = true) ||
+                            it.content.contains(text, ignoreCase = true)
                 }
             }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    init {
+        viewModelScope.launch {
+            runCatching { repository.refresh() }
+        }
+    }
 
     fun updateQuery(newText: String) {
         _query.value = newText

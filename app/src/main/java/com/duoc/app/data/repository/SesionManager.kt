@@ -9,23 +9,31 @@ class SesionManager(context: Context) {
         Context.MODE_PRIVATE
     )
 
-    fun guardarSesion(usuarioId: Int) {
-        preferencias.edit()
-            .putInt("usuarioId", usuarioId)
-            .apply()
+    fun guardarToken(token: String) {
+        preferencias.edit().putString(KEY_TOKEN, token).apply()
     }
 
-    fun obtenerUsuarioId(): Int {
-        return preferencias.getInt("usuarioId", -1)
+    fun obtenerToken(): String? = preferencias.getString(KEY_TOKEN, null)
+
+    fun guardarSesion(usuarioId: Int) {
+        preferencias.edit().putInt(KEY_USUARIO_ID, usuarioId).apply()
     }
+
+    fun obtenerUsuarioId(): Int = preferencias.getInt(KEY_USUARIO_ID, -1)
 
     fun sesionIniciada(): Boolean {
-        return obtenerUsuarioId() != -1
+        return !obtenerToken().isNullOrBlank() || obtenerUsuarioId() != -1
     }
 
     fun cerrarSesion() {
         preferencias.edit()
-            .remove("usuarioId")
+            .remove(KEY_TOKEN)
+            .remove(KEY_USUARIO_ID)
             .apply()
+    }
+
+    private companion object {
+        const val KEY_TOKEN = "token"
+        const val KEY_USUARIO_ID = "usuarioId"
     }
 }
